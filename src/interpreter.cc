@@ -1,0 +1,179 @@
+#include "interpreter.hh"
+#include "ast.hh"
+#include <iostream>
+#include <stdexcept>
+
+Interpreter::Interpreter() = default;
+
+void Interpreter::visitProgram(Program *program) {
+  for (const auto &stmt : program->statements) {
+    visit(stmt.get());
+  }
+}
+
+void Interpreter::visitNum(Num *num) { currentExpr = num; }
+
+void Interpreter::visitBool(Bool *boolExpr) { currentExpr = boolExpr; }
+
+void Interpreter::visitVariantConstr(VariantConstr *variantConstr) {
+  for (int i = 0; i < variantConstr->args.size(); i++) {
+    visit(variantConstr->args[i].get());
+    variantConstr->args[i] = std::unique_ptr<Expr>(currentExpr);
+  }
+  currentExpr = variantConstr;
+}
+
+void Interpreter::visitBinOp(BinOp *binOp) {
+  visit(binOp->left.get());
+  auto leftExpr = currentExpr;
+  visit(binOp->right.get());
+  auto rightExpr = currentExpr;
+
+  switch (binOp->op) {
+  case BinOpType::ADD:
+    currentExpr = new Num(static_cast<Num *>(leftExpr)->value +
+                          static_cast<Num *>(rightExpr)->value);
+    break;
+  case BinOpType::SUB:
+    currentExpr = new Num(static_cast<Num *>(leftExpr)->value -
+                          static_cast<Num *>(rightExpr)->value);
+    break;
+  case BinOpType::MUL:
+    currentExpr = new Num(static_cast<Num *>(leftExpr)->value *
+                          static_cast<Num *>(rightExpr)->value);
+    break;
+  case BinOpType::DIV:
+    if (static_cast<Num *>(rightExpr)->value != 0) {
+      currentExpr = new Num(static_cast<Num *>(leftExpr)->value /
+                            static_cast<Num *>(rightExpr)->value);
+    } else {
+      throw std::runtime_error("Runtime error: Division by zero");
+    }
+    break;
+  case BinOpType::AND:
+    currentExpr = new Bool(static_cast<Bool *>(leftExpr)->value &&
+                           static_cast<Bool *>(rightExpr)->value);
+    break;
+  case BinOpType::OR:
+    currentExpr = new Bool(static_cast<Bool *>(leftExpr)->value ||
+                           static_cast<Bool *>(rightExpr)->value);
+    break;
+  case BinOpType::EQ:
+    switch (leftExpr->exprType) {
+    case ExprType::NUM:
+      currentExpr = new Bool(static_cast<Num *>(leftExpr)->value ==
+                             static_cast<Num *>(rightExpr)->value);
+      break;
+    case ExprType::BOOL:
+      currentExpr = new Bool(static_cast<Bool *>(leftExpr)->value ==
+                             static_cast<Bool *>(rightExpr)->value);
+      break;
+    case ExprType::VARIANT_CONSTR:
+      currentExpr = new Bool(static_cast<VariantConstr *>(leftExpr) ==
+                             static_cast<VariantConstr *>(rightExpr));
+    default:
+      throw std::runtime_error("Runtime error: Unsupported types for EQ");
+    }
+    break;
+
+  case BinOpType::LT:
+    currentExpr = new Bool(static_cast<Num *>(leftExpr)->value <
+                           static_cast<Num *>(rightExpr)->value);
+    break;
+  case BinOpType::GT:
+    currentExpr = new Bool(static_cast<Num *>(leftExpr)->value >
+                           static_cast<Num *>(rightExpr)->value);
+    break;
+
+  default:
+    throw std::runtime_error("Runtime error: Unknown binary operator");
+  }
+}
+
+void Interpreter::visitUnOp(UnOp *unOp) {
+  visit(unOp->expr.get());
+  auto expr = currentExpr;
+
+  switch (unOp->op) {
+  case UnOpType::NOT:
+    currentExpr = new Bool(!static_cast<Bool *>(expr)->value);
+    break;
+  default:
+    throw std::runtime_error("Runtime error: Unknown unary operator");
+  }
+}
+
+void Interpreter::visitVarUse(VarUse *varUse) {
+  currentExpr = valEnv.get(varUse->name);
+  if (currentExpr == nullptr) {
+    throw std::runtime_error("Runtime error: Undefined variable: " +
+                             varUse->name);
+  }
+}
+
+void Interpreter::visitDecl(Decl *decl) {}
+
+void Interpreter::visitVariant(Variant *variant) {}
+
+void Interpreter::visitAssign(Assign *assign) {
+  visit(assign->right.get());
+  Expr *rightValue = currentExpr;
+  valEnv.put(assign->left, rightValue);
+}
+
+void Interpreter::visitIf(If *ifStmt) {
+  visit(ifStmt->condition.get());
+  Expr *conditionExpr = currentExpr;
+  if (conditionExpr->exprType != ExprType::BOOL) {
+    throw std::runtime_error("Runtime error: Condition is not boolean");
+  }
+  if (static_cast<Bool *>(conditionExpr)->value) {
+    for (const auto &stmt : ifStmt->thenStmts) {
+      visit(stmt.get());
+    }
+  }
+}
+
+void Interpreter::visitIfElse(IfElse *ifElseStmt) {
+  visit(ifElseStmt->condition.get());
+  Expr *conditionExpr = currentExpr;
+  if (conditionExpr->exprType != ExprType::BOOL) {
+    throw std::runtime_error("Runtime error: Condition is not boolean");
+  }
+  if (static_cast<Bool *>(conditionExpr)->value) {
+    for (const auto &stmt : ifElseStmt->thenStmts) {
+      visit(stmt.get());
+    }
+  } else {
+    for (const auto &stmt : ifElseStmt->elseStmts) {
+      visit(stmt.get());
+    }
+  }
+}
+
+void Interpreter::visitPrint(Print *print) {
+  visit(print->expr.get());
+  Expr *exprToPrint = currentExpr;
+  switch (exprToPrint->exprType) {
+  case ExprType::NUM:
+    std::cout << static_cast<Num *>(exprToPrint)->value << std::endl;
+    break;
+  case ExprType::BOOL:
+    std::cout << static_cast<Bool *>(exprToPrint)->value << std::endl;
+    break;
+  case ExprType::VARIANT_CONSTR: {
+    auto constr = static_cast<VariantConstr *>(exprToPrint);
+    std::cout << constr->constr << "(";
+    for (auto &arg : constr->args) {
+      auto newPrint = new Print(std::move(arg));
+      visitPrint(std::move(newPrint));
+    }
+    std::cout << "(" << std::endl;
+    break;
+  }
+  default:
+    throw std::runtime_error(
+        "Runtime error: Cannot print non-numeric expression");
+    break;
+  }
+}
