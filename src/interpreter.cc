@@ -61,18 +61,22 @@ void Interpreter::visitBinOp(BinOp *binOp) {
   case BinOpType::EQ:
     switch (leftExpr->exprType) {
     case ExprType::NUM:
-      currentExpr = new Bool(static_cast<Num *>(leftExpr)->value ==
-                             static_cast<Num *>(rightExpr)->value);
+      currentExpr = new Bool(*static_cast<Num *>(leftExpr) ==
+                             *static_cast<Num *>(rightExpr));
+
       break;
     case ExprType::BOOL:
-      currentExpr = new Bool(static_cast<Bool *>(leftExpr)->value ==
-                             static_cast<Bool *>(rightExpr)->value);
+      currentExpr = new Bool(*static_cast<Bool *>(leftExpr) ==
+                             *static_cast<Bool *>(rightExpr));
       break;
+
     case ExprType::VARIANT_CONSTR:
-      currentExpr = new Bool(static_cast<VariantConstr *>(leftExpr) ==
-                             static_cast<VariantConstr *>(rightExpr));
+      currentExpr = new Bool(*static_cast<VariantConstr *>(leftExpr) ==
+                             *static_cast<VariantConstr *>(rightExpr));
+      break;
     default:
-      throw std::runtime_error("Runtime error: Unsupported types for EQ");
+      throw std::runtime_error(
+          "Runtime error: Unsupported type for EQ operation");
     }
     break;
 

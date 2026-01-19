@@ -23,9 +23,16 @@ void TypeChecker::visitVariantConstr(VariantConstr *variantConstr) {
     visit(&*arg);
     typeExprs.push_back(currentTypeExpr->clone());
   }
-  VariantConstrType *variantConstrType =
-      new VariantConstrType(variantConstr->constr, std::move(typeExprs));
-  currentTypeExpr = typeEnv.getConstrType(std::move(*variantConstrType));
+  // VariantConstrType *variantConstrType =
+  //     new VariantConstrType(variantConstr->constr, std::move(typeExprs));
+
+  VariantConstrType variantConstrType(variantConstr->constr,
+                                      std::move(typeExprs));
+  currentTypeExpr = typeEnv.getConstrType(std::move(variantConstrType));
+  if (currentTypeExpr == nullptr) {
+    throw std::runtime_error("Undefined variant constructor: " +
+                             variantConstr->constr);
+  }
 }
 
 void TypeChecker::visitBinOp(BinOp *binOp) {
@@ -92,7 +99,7 @@ void TypeChecker::visitVarUse(VarUse *varUse) {
 void TypeChecker::visitDecl(Decl *decl) {
   currentTypeExpr = typeEnv.get(decl->name);
   if (currentTypeExpr == nullptr) {
-    typeEnv.put(decl->name, decl->type.get());
+    typeEnv.put(decl->name, decl->type->clone().release());
   } else {
     throw std::runtime_error("Cannot redefine variable: " + decl->name);
   }

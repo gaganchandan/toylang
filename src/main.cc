@@ -36,14 +36,17 @@ int main() {
       std::make_unique<VariantConstr>("NonZero", std::move(variantConstrArgs1));
   auto stmt3 =
       std::make_unique<Assign>(std::move("v1"), std::move(variantConstr1));
-  std::vector<std::unique_ptr<Expr>> variantConstrArgs2;
+  std::vector<std::unique_ptr<Expr>> variantConstrArgs2 =
+      std::vector<std::unique_ptr<Expr>>();
+  variantConstrArgs2.push_back(std::move(std::make_unique<Num>(42)));
   auto variantConstr2 =
-      std::make_unique<VariantConstr>("Zero", std::move(variantConstrArgs2));
+      std::make_unique<VariantConstr>("NonZero", std::move(variantConstrArgs2));
   auto stmt4 =
       std::make_unique<Assign>(std::move("v2"), std::move(variantConstr2));
-
-  // auto stmt4 =
-  // std::make_unique<Decl>(std::move("z"), std::make_unique<IntType>());
+  auto eqExpr =
+      std::make_unique<BinOp>(std::make_unique<VarUse>("v1"), BinOpType::EQ,
+                              std::make_unique<VarUse>("v2"));
+  auto printStmt = std::make_unique<Print>(std::move(eqExpr));
 
   auto thenStmts = std::vector<std::unique_ptr<Stmt>>();
   std::vector<std::unique_ptr<Stmt>> statements;
@@ -56,6 +59,7 @@ int main() {
   statements.push_back(std::move(stmt2));
   statements.push_back(std::move(stmt3));
   statements.push_back(std::move(stmt4));
+  statements.push_back(std::move(printStmt));
   Program program(std::move(statements));
   std::cout << "---- Program ----" << std::endl;
   Printer printer;

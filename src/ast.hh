@@ -110,6 +110,8 @@ public:
 public:
   explicit Bool(bool);
   std::unique_ptr<Expr> clone() const override;
+  // toString method for debugging
+
   bool isEqual(const Expr &other) const override;
 };
 

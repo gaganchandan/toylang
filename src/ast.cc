@@ -1,10 +1,14 @@
 #include "ast.hh"
+#include <iostream>
 
 // Type Expressions
 TypeExpr::TypeExpr(TypeExprType type) : typeExprType(type) {}
 
 bool TypeExpr::operator==(const TypeExpr &other) const {
-  return (typeid(*this) == typeid(other)) && isEqual(other);
+  if (this->typeExprType != other.typeExprType) {
+    return false;
+  }
+  return this->isEqual(other);
 }
 
 IntType::IntType() : TypeExpr(TypeExprType::INT_TYPE) {}
@@ -58,10 +62,25 @@ std::unique_ptr<TypeExpr> VariantConstrType::clone() const {
 
 std::string VariantConstrType::toString() const { return constr; }
 
+// bool VariantConstrType::isEqual(const TypeExpr &other) const {
+//   return (this->constr ==
+//           static_cast<const VariantConstrType &>(other).constr) &&
+//          (this->args == static_cast<const VariantConstrType &>(other).args);
+// }
+
 bool VariantConstrType::isEqual(const TypeExpr &other) const {
-  return (this->constr ==
-          static_cast<const VariantConstrType &>(other).constr) &&
-         (this->args == static_cast<const VariantConstrType &>(other).args);
+  const auto &o = static_cast<const VariantConstrType &>(other);
+
+  if (constr != o.constr)
+    return false;
+  if (args.size() != o.args.size())
+    return false;
+
+  for (size_t i = 0; i < args.size(); ++i) {
+    if (!(*args[i] == *o.args[i]))
+      return false;
+  }
+  return true;
 }
 
 bool VariantConstrType::operator<(const VariantConstrType &other) const {
@@ -82,7 +101,26 @@ bool VariantConstrType::operator<(const VariantConstrType &other) const {
 Expr::Expr(ExprType type) : exprType(type) {}
 
 bool Expr::operator==(const Expr &other) const {
-  return (typeid(*this) == typeid(other)) && isEqual(other);
+  if (this->exprType != other.exprType) {
+    return false;
+  }
+  if (!(this->isEqual(other))) {
+    switch (this->exprType) {
+    case ExprType::NUM:
+      std::cout << "Num values not equal: "
+                << static_cast<const Num *>(this)->value << " vs "
+                << static_cast<const Num *>(&other)->value << std::endl;
+      break;
+    case ExprType::BOOL:
+      std::cout << "Bool values not equal: "
+                << static_cast<const Bool *>(this)->value << " vs "
+                << static_cast<const Bool *>(&other)->value << std::endl;
+      break;
+    default:
+      break;
+    }
+  }
+  return this->isEqual(other);
 }
 
 Num::Num(int val) : Expr(ExprType::NUM), value(val) {}
@@ -120,9 +158,37 @@ std::unique_ptr<Expr> VariantConstr::clone() const {
 }
 
 bool VariantConstr::isEqual(const Expr &other) const {
-  auto otherConstr = static_cast<const VariantConstr *>(&other);
-  return (this->constr == otherConstr->constr) &&
-         this->args == otherConstr->args;
+  const auto o = static_cast<const VariantConstr *>(&other);
+
+  if (constr != o->constr) {
+    std::cout << "Constr not equal: " << constr << " vs " << o->constr
+              << std::endl;
+    return false;
+  }
+  if (args.size() != o->args.size()) {
+    std::cout << "Args size not equal: " << args.size() << " vs "
+              << o->args.size() << std::endl;
+    return false;
+  }
+
+  for (size_t i = 0; i < args.size(); ++i) {
+    if (!(*args[i] == *o->args[i])) {
+      switch (args[i]->exprType) {
+      case ExprType::NUM:
+        std::cout << "Arg " << i << " Num values not equal: "
+                  << static_cast<const Num *>(args[i].get())->value << " vs "
+                  << static_cast<const Num *>(o->args[i].get())->value
+                  << std::endl;
+        break;
+      default:
+        break;
+      }
+      std::cout << "Arg " << i << " not equal." << std::endl;
+      return false;
+    }
+  }
+  std::cout << "VariantConstrs are equal." << std::endl;
+  return true;
 }
 
 BinOp::BinOp(std::unique_ptr<Expr> left, BinOpType op,

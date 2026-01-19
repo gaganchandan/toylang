@@ -1,5 +1,6 @@
 CC = g++
-CFLAGS = -g
+# CFLAGS = -g -fsanitize=address -fno-omit-frame-pointer
+CFLAGS = -g 
 BUILD = build
 SRC = .
 BIN = bin
