@@ -6,10 +6,8 @@
 TypeChecker::TypeChecker() = default;
 
 void TypeChecker::visitProgram(Program *program) {
-  int it = 1;
-  for (const auto &stmt : program->statements) {
+  for (auto &stmt : program->statements) {
     visit(stmt.get());
-    std::cout << it++;
   }
 }
 

@@ -12,12 +12,10 @@ void Printer::visitBool(Bool *boolExpr) {
 }
 
 void Printer::visitVariantConstr(VariantConstr *variantConstr) {
-  std::cout << variantConstr->constr;
-  std::cout << "(";
-  for (auto it = variantConstr->args.begin(); it != variantConstr->args.end();
-       ++it) {
-    visit(it->get());
-    if (std::next(it) != variantConstr->args.end()) {
+  std::cout << variantConstr->constr << "(";
+  for (size_t i = 0; i < variantConstr->args.size(); ++i) {
+    visit(variantConstr->args[i].get());
+    if (i != variantConstr->args.size() - 1) {
       std::cout << ", ";
     }
   }
@@ -99,7 +97,7 @@ void Printer::visitPrint(Print *print) {
 }
 
 void Printer::visitProgram(Program *program) {
-  for (const auto &stmt : program->statements) {
+  for (auto &stmt : program->statements) {
     visit(stmt.get());
     std::cout << std::endl << std::endl;
   }

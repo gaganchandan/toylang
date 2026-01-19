@@ -1,5 +1,5 @@
 CC = g++
-CFLAGS = -g -fsanitize=address,undefined -Wall -Wextra -Wpedantic
+CFLAGS = -g
 BUILD = build
 SRC = .
 BIN = bin

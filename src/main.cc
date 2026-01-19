@@ -36,12 +36,14 @@ int main() {
       std::make_unique<VariantConstr>("NonZero", std::move(variantConstrArgs1));
   auto stmt3 =
       std::make_unique<Assign>(std::move("v1"), std::move(variantConstr1));
-  auto variantConstrArgs2 = std::vector<std::unique_ptr<Expr>>();
+  std::vector<std::unique_ptr<Expr>> variantConstrArgs2;
   auto variantConstr2 =
-      std::make_unique<VariantConstr>("NonZero", std::move(variantConstrArgs2));
+      std::make_unique<VariantConstr>("Zero", std::move(variantConstrArgs2));
   auto stmt4 =
       std::make_unique<Assign>(std::move("v2"), std::move(variantConstr2));
-  //
+
+  // auto stmt4 =
+  // std::make_unique<Decl>(std::move("z"), std::make_unique<IntType>());
 
   auto thenStmts = std::vector<std::unique_ptr<Stmt>>();
   std::vector<std::unique_ptr<Stmt>> statements;

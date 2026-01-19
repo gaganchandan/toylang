@@ -6,7 +6,7 @@
 Interpreter::Interpreter() = default;
 
 void Interpreter::visitProgram(Program *program) {
-  for (const auto &stmt : program->statements) {
+  for (auto &stmt : program->statements) {
     visit(stmt.get());
   }
 }
