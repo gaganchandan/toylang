@@ -3,7 +3,9 @@
 #include <iostream>
 #include <stdexcept>
 
-TypeChecker::TypeChecker() = default;
+TypeChecker::TypeChecker() : scope(0), currentTypeExpr(nullptr) {
+  typeEnvs.emplace_back();
+}
 
 void TypeChecker::visitProgram(Program *program) {
   for (auto &stmt : program->statements) {
@@ -25,7 +27,7 @@ void TypeChecker::visitVariantConstr(VariantConstr *variantConstr) {
   }
   VariantConstrType variantConstrType(variantConstr->constr,
                                       std::move(typeExprs));
-  currentTypeExpr = typeEnv.getVariant(variantConstrType);
+  currentTypeExpr = typeEnvs[scope].getVariant(variantConstrType);
   if (currentTypeExpr == nullptr) {
     throw std::runtime_error("Undefined variant constructor: " +
                              variantConstr->constr);
@@ -39,7 +41,7 @@ void TypeChecker::visitRecordVal(RecordVal *recordVal) {
     fields[field.first] = currentTypeExpr->clone();
   }
   RecordType recordType("", std::move(fields));
-  currentTypeExpr = typeEnv.getRecord(recordType);
+  currentTypeExpr = typeEnvs[scope].getRecord(recordType);
   if (currentTypeExpr == nullptr) {
     throw std::runtime_error("Undefined record type");
   }
@@ -100,30 +102,31 @@ void TypeChecker::visitUnOp(UnOp *unOp) {
 }
 
 void TypeChecker::visitVarUse(VarUse *varUse) {
-  currentTypeExpr = typeEnv.get(varUse->name);
+  currentTypeExpr = typeEnvs[scope].get(varUse->name);
   if (currentTypeExpr == nullptr) {
     throw std::runtime_error("Undefined variable: " + varUse->name);
   }
 }
 
 void TypeChecker::visitDecl(Decl *decl) {
-  currentTypeExpr = typeEnv.get(decl->name);
+  currentTypeExpr = typeEnvs[scope].get(decl->name);
   if (currentTypeExpr == nullptr) {
-    typeEnv.put(decl->name, decl->type->clone().release());
+    typeEnvs[scope].put(decl->name, decl->type->clone().release());
   } else {
     throw std::runtime_error("Cannot redefine variable: " + decl->name);
   }
 }
 
 void TypeChecker::visitVariant(Variant *variant) {
-  if (typeEnv.checkVariant(variant->name)) {
+  if (typeEnvs[scope].checkVariant(variant->name)) {
     throw std::runtime_error("Cannot redefine variant: " + variant->name);
   }
   for (auto &constr : variant->constructors) {
     auto variantConstrType = std::make_unique<VariantConstrType>(
         std::move(constr.first), std::move(constr.second));
     auto variantType = std::make_unique<VariantType>(variant->name);
-    typeEnv.newVariant(std::move(*variantConstrType), std::move(*variantType));
+    typeEnvs[scope].newVariant(std::move(*variantConstrType),
+                               std::move(*variantType));
   }
 }
 
@@ -132,7 +135,7 @@ void TypeChecker::visitRecord(Record *record) {}
 void TypeChecker::visitAssign(Assign *assign) {
   visit(assign->right.get());
   auto rightType = currentTypeExpr;
-  auto leftType = typeEnv.get(assign->left);
+  auto leftType = typeEnvs[scope].get(assign->left);
   if (leftType == nullptr) {
     throw std::runtime_error("Undefined variable: " + assign->left);
   }
