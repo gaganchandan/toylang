@@ -1,0 +1,252 @@
+\documentclass[a4paper,11pt]{article}
+
+% ---------------- Packages ----------------
+\usepackage{amsmath,amssymb}
+\usepackage{mathpartir}
+\usepackage{geometry}
+\geometry{margin=1in}
+
+% ---------------- Macros ----------------
+\newcommand{\Int}{\texttt{Int}}
+\newcommand{\Bool}{\texttt{Bool}}
+\newcommand{\ctx}{\Gamma}
+\newcommand{\vctx}{\Sigma}
+
+\newcommand{\typed}[3]{#1 ; #2 \vdash #3}
+\newcommand{\checkstmt}[3]{#1 ; #2 \vdash #3\ \checkmark}
+
+% ---------------- Document ----------------
+\begin{document}
+
+\title{Typing Rules}
+\author{}
+\date{}
+\maketitle
+
+\section*{Types}
+\[
+\tau ::= \Int \mid \Bool \mid V
+\]
+
+\section*{Typing Judgements}
+
+\begin{itemize}
+  \item Expression typing:
+  \[
+    \ctx ; \vctx \vdash e : \tau
+  \]
+  \item Statement typing:
+  \[
+    \ctx ; \vctx \vdash s \;\checkmark (\checkmark indicates \ well-typed)
+  \]
+\end{itemize}
+
+\section*{Literals}
+
+\begin{mathpar}
+\inferrule*[right=T-Num]
+{ }
+{ \ctx ; \vctx \vdash n : \Int }
+
+\inferrule*[right=T-Bool]
+{ }
+{ \ctx ; \vctx \vdash b : \Bool }
+\end{mathpar}
+
+\section*{Variables}
+
+\begin{mathpar}
+\inferrule*[right=T-Var]
+{ x : \tau \in \ctx }
+{ \ctx ; \vctx \vdash x : \tau }
+\end{mathpar}
+
+\section*{Binary Operations}
+
+\subsection*{Arithmetic}
+
+\begin{mathpar}
+\inferrule*[right=T-Arith]
+{
+  \ctx ; \vctx \vdash e_1 : \Int \\
+  \ctx ; \vctx \vdash e_2 : \Int
+}
+{
+  \ctx ; \vctx \vdash e_1 \oplus e_2 : \Int
+}
+\quad
+(\oplus \in \{+, -, *, /\})
+\end{mathpar}
+
+\subsection*{Comparison}
+
+\begin{mathpar}
+\inferrule*[right=T-Comp]
+{
+  \ctx ; \vctx \vdash e_1 : \Int \\
+  \ctx ; \vctx \vdash e_2 : \Int
+}
+{
+  \ctx ; \vctx \vdash e_1 \bowtie e_2 : \Bool
+}
+\quad
+(\bowtie \in \{<, >\})
+\end{mathpar}
+
+\subsection*{Logical}
+
+\begin{mathpar}
+\inferrule*[right=T-Logic]
+{
+  \ctx ; \vctx \vdash e_1 : \Bool \\
+  \ctx ; \vctx \vdash e_2 : \Bool
+}
+{
+  \ctx ; \vctx \vdash e_1 \odot e_2 : \Bool
+}
+\quad
+(\odot \in \{\land, \lor\})
+\end{mathpar}
+
+\subsection*{Equality}
+
+\begin{mathpar}
+\inferrule*[right=T-Eq]
+{
+  \ctx ; \vctx \vdash e_1 : \tau \\
+  \ctx ; \vctx \vdash e_2 : \tau
+}
+{
+  \ctx ; \vctx \vdash e_1 == e_2 : \Bool
+}
+\end{mathpar}
+
+\section*{Unary Operations}
+
+\begin{mathpar}
+\inferrule*[right=T-Not]
+{
+  \ctx ; \vctx \vdash e : \Bool
+}
+{
+  \ctx ; \vctx \vdash !e : \Bool
+}
+\end{mathpar}
+
+\section*{Variants}
+
+\subsection*{Variant Declaration}
+
+\begin{mathpar}
+\inferrule*[right=T-VariantDecl]
+{
+  V \notin \vctx
+}
+{
+  \ctx ; \vctx \vdash
+  \texttt{variant } V =
+  \{ C_i(\tau_i) \}
+  \Rightarrow
+  \vctx \cup \{ C_i : \tau_i \to V \}
+}
+\end{mathpar}
+
+\subsection*{Variant Constructor Use}
+
+\begin{mathpar}
+\inferrule*[right=T-VariantConstr]
+{
+  \ctx ; \vctx \vdash e_j : \tau_j
+  \\
+  \vctx(C) = (\tau_1,\dots,\tau_n) \to V
+}
+{
+  \ctx ; \vctx \vdash C(e_1,\dots,e_n) : V
+}
+\end{mathpar}
+
+\section*{Declarations and Assignment}
+
+\subsection*{Variable Declaration}
+
+\begin{mathpar}
+\inferrule*[right=T-Decl]
+{
+  x \notin \ctx
+}
+{
+  \ctx ; \vctx \vdash \texttt{decl } x : \tau
+  \Rightarrow
+  \ctx \cup \{ x : \tau \}
+}
+\end{mathpar}
+
+\subsection*{Assignment}
+
+\begin{mathpar}
+\inferrule*[right=T-Assign]
+{
+  x : \tau \in \ctx \\
+  \ctx ; \vctx \vdash e : \tau
+}
+{
+  \checkstmt{\ctx}{\vctx}{x := e}
+}
+\end{mathpar}
+
+\section*{Control Flow}
+
+\subsection*{If}
+
+\begin{mathpar}
+\inferrule*[right=T-If]
+{
+  \ctx ; \vctx \vdash e : \Bool \\
+  \forall s \in S.\; \checkstmt{\ctx}{\vctx}{s}
+}
+{
+  \checkstmt{\ctx}{\vctx}{\texttt{if } e \texttt{ then } S}
+}
+\end{mathpar}
+
+\subsection*{If--Else}
+
+\begin{mathpar}
+\inferrule*[right=T-IfElse]
+{
+  \ctx ; \vctx \vdash e : \Bool \\
+  \forall s \in S_1.\; \checkstmt{\ctx}{\vctx}{s} \\
+  \forall s \in S_2.\; \checkstmt{\ctx}{\vctx}{s}
+}
+{
+  \checkstmt{\ctx}{\vctx}{
+    \texttt{if } e \texttt{ then } S_1 \texttt{ else } S_2
+  }
+}
+\end{mathpar}
+
+\section*{Print}
+
+\begin{mathpar}
+\inferrule*[right=T-Print]
+{
+  \ctx ; \vctx \vdash e : \tau
+}
+{
+  \checkstmt{\ctx}{\vctx}{\texttt{print } e}
+}
+\end{mathpar}
+
+\section*{Program}
+
+\begin{mathpar}
+\inferrule*[right=T-Program]
+{
+  \forall s \in P.\; \checkstmt{\ctx}{\vctx}{s}
+}
+{
+  \ctx ; \vctx \vdash P \;\checkmark
+}
+\end{mathpar}
+
+\end{document}
