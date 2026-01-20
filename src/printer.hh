@@ -21,6 +21,7 @@ protected:
   void visitAssign(Assign *assign) override;
   void visitIf(If *ifStmt) override;
   void visitIfElse(IfElse *ifElseStmt) override;
+  void visitMatch(Match *match) override;
   void visitPrint(Print *print) override;
 
 public:
