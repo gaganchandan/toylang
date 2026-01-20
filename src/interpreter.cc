@@ -16,9 +16,10 @@ void Interpreter::visitNum(Num *num) { currentExpr = num; }
 void Interpreter::visitBool(Bool *boolExpr) { currentExpr = boolExpr; }
 
 void Interpreter::visitVariantConstr(VariantConstr *variantConstr) {
-  for (int i = 0; i < variantConstr->args.size(); i++) {
-    visit(variantConstr->args[i].get());
-    variantConstr->args[i] = std::unique_ptr<Expr>(currentExpr);
+
+  for (auto &arg : variantConstr->args) {
+    visit(arg.get());
+    arg = currentExpr->clone();
   }
   currentExpr = variantConstr;
 }
@@ -121,6 +122,14 @@ void Interpreter::visitVariant(Variant *variant) {}
 
 void Interpreter::visitAssign(Assign *assign) {
   visit(assign->right.get());
+  switch (currentExpr->exprType) {
+  case ExprType::VARIANT_CONSTR: {
+    auto x = static_cast<VariantConstr *>(currentExpr);
+    break;
+  }
+  default:
+    break;
+  }
   Expr *rightValue = currentExpr;
   valEnv.put(assign->left, rightValue);
 }
@@ -155,29 +164,9 @@ void Interpreter::visitIfElse(IfElse *ifElseStmt) {
   }
 }
 
+// Print using Expr::toString()
 void Interpreter::visitPrint(Print *print) {
   visit(print->expr.get());
   Expr *exprToPrint = currentExpr;
-  switch (exprToPrint->exprType) {
-  case ExprType::NUM:
-    std::cout << static_cast<Num *>(exprToPrint)->value << std::endl;
-    break;
-  case ExprType::BOOL:
-    std::cout << static_cast<Bool *>(exprToPrint)->value << std::endl;
-    break;
-  case ExprType::VARIANT_CONSTR: {
-    auto constr = static_cast<VariantConstr *>(exprToPrint);
-    std::cout << constr->constr << "(";
-    for (auto &arg : constr->args) {
-      auto newPrint = new Print(std::move(arg));
-      visitPrint(std::move(newPrint));
-    }
-    std::cout << "(" << std::endl;
-    break;
-  }
-  default:
-    throw std::runtime_error(
-        "Runtime error: Cannot print non-numeric expression");
-    break;
-  }
+  std::cout << exprToPrint->toString() << std::endl;
 }

@@ -86,6 +86,7 @@ public:
 public:
   virtual ~Expr() = default;
   virtual std::unique_ptr<Expr> clone() const = 0;
+  virtual std::string toString() const = 0;
   virtual bool isEqual(const Expr &other) const = 0;
   bool operator==(const Expr &other) const;
 
@@ -100,6 +101,7 @@ public:
 public:
   explicit Num(int);
   std::unique_ptr<Expr> clone() const override;
+  std::string toString() const override;
   bool isEqual(const Expr &other) const override;
 };
 
@@ -110,8 +112,7 @@ public:
 public:
   explicit Bool(bool);
   std::unique_ptr<Expr> clone() const override;
-  // toString method for debugging
-
+  std::string toString() const override;
   bool isEqual(const Expr &other) const override;
 };
 
@@ -124,6 +125,7 @@ public:
 public:
   VariantConstr(std::string, std::vector<std::unique_ptr<Expr>>);
   std::unique_ptr<Expr> clone() const override;
+  std::string toString() const override;
   bool isEqual(const Expr &other) const override;
 };
 
@@ -134,6 +136,7 @@ public:
 public:
   explicit VarUse(std::string);
   std::unique_ptr<Expr> clone() const override;
+  std::string toString() const override;
   bool isEqual(const Expr &other) const override;
 };
 
@@ -146,6 +149,7 @@ public:
 public:
   BinOp(std::unique_ptr<Expr>, BinOpType, std::unique_ptr<Expr>);
   std::unique_ptr<Expr> clone() const override;
+  std::string toString() const override;
   bool isEqual(const Expr &other) const override;
 };
 
@@ -157,6 +161,7 @@ public:
 public:
   UnOp(UnOpType, std::unique_ptr<Expr>);
   std::unique_ptr<Expr> clone() const override;
+  std::string toString() const override;
   bool isEqual(const Expr &other) const override;
 };
 

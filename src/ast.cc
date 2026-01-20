@@ -1,5 +1,6 @@
 #include "ast.hh"
-#include <iostream>
+// #include <iostream>
+#include <sstream>
 
 // Type Expressions
 TypeExpr::TypeExpr(TypeExprType type) : typeExprType(type) {}
@@ -62,12 +63,6 @@ std::unique_ptr<TypeExpr> VariantConstrType::clone() const {
 
 std::string VariantConstrType::toString() const { return constr; }
 
-// bool VariantConstrType::isEqual(const TypeExpr &other) const {
-//   return (this->constr ==
-//           static_cast<const VariantConstrType &>(other).constr) &&
-//          (this->args == static_cast<const VariantConstrType &>(other).args);
-// }
-
 bool VariantConstrType::isEqual(const TypeExpr &other) const {
   const auto &o = static_cast<const VariantConstrType &>(other);
 
@@ -107,14 +102,8 @@ bool Expr::operator==(const Expr &other) const {
   if (!(this->isEqual(other))) {
     switch (this->exprType) {
     case ExprType::NUM:
-      std::cout << "Num values not equal: "
-                << static_cast<const Num *>(this)->value << " vs "
-                << static_cast<const Num *>(&other)->value << std::endl;
       break;
     case ExprType::BOOL:
-      std::cout << "Bool values not equal: "
-                << static_cast<const Bool *>(this)->value << " vs "
-                << static_cast<const Bool *>(&other)->value << std::endl;
       break;
     default:
       break;
@@ -129,6 +118,8 @@ std::unique_ptr<Expr> Num::clone() const {
   return std::make_unique<Num>(this->value);
 }
 
+std::string Num::toString() const { return std::to_string(value); }
+
 bool Num::isEqual(const Expr &other) const {
   return this->value == static_cast<const Num *>(&other)->value;
 }
@@ -138,6 +129,8 @@ Bool::Bool(bool val) : Expr(ExprType::BOOL), value(val) {}
 std::unique_ptr<Expr> Bool::clone() const {
   return std::make_unique<Bool>(this->value);
 }
+
+std::string Bool::toString() const { return value ? "true" : "false"; }
 
 bool Bool::isEqual(const Expr &other) const {
   return this->value == static_cast<const Bool *>(&other)->value;
@@ -157,37 +150,38 @@ std::unique_ptr<Expr> VariantConstr::clone() const {
   return std::make_unique<VariantConstr>(constr, std::move(clonedArgs));
 }
 
+std::string VariantConstr::toString() const {
+  std::ostringstream oss;
+  oss << constr << "(";
+  if (args.size() == 0) {
+    oss << ")";
+    return oss.str();
+  }
+  for (size_t i = 0; i < args.size(); i++) {
+    oss << args[i]->toString();
+    if (i != args.size() - 1) {
+      oss << ", ";
+    }
+  }
+  oss << ")";
+  return oss.str();
+}
+
 bool VariantConstr::isEqual(const Expr &other) const {
   const auto o = static_cast<const VariantConstr *>(&other);
 
   if (constr != o->constr) {
-    std::cout << "Constr not equal: " << constr << " vs " << o->constr
-              << std::endl;
     return false;
   }
   if (args.size() != o->args.size()) {
-    std::cout << "Args size not equal: " << args.size() << " vs "
-              << o->args.size() << std::endl;
     return false;
   }
 
   for (size_t i = 0; i < args.size(); ++i) {
     if (!(*args[i] == *o->args[i])) {
-      switch (args[i]->exprType) {
-      case ExprType::NUM:
-        std::cout << "Arg " << i << " Num values not equal: "
-                  << static_cast<const Num *>(args[i].get())->value << " vs "
-                  << static_cast<const Num *>(o->args[i].get())->value
-                  << std::endl;
-        break;
-      default:
-        break;
-      }
-      std::cout << "Arg " << i << " not equal." << std::endl;
       return false;
     }
   }
-  std::cout << "VariantConstrs are equal." << std::endl;
   return true;
 }
 
@@ -201,6 +195,40 @@ std::unique_ptr<Expr> BinOp::clone() const {
                                  this->right->clone());
 }
 
+std::string BinOp::toString() const {
+  const char *opStr;
+  switch (op) {
+  case BinOpType::ADD:
+    opStr = "+";
+    break;
+  case BinOpType::SUB:
+    opStr = "-";
+    break;
+  case BinOpType::MUL:
+    opStr = "*";
+    break;
+  case BinOpType::DIV:
+    opStr = "/";
+    break;
+  case BinOpType::AND:
+    opStr = "&&";
+    break;
+  case BinOpType::OR:
+    opStr = "||";
+    break;
+  case BinOpType::EQ:
+    opStr = "==";
+    break;
+  case BinOpType::LT:
+    opStr = "<";
+    break;
+  case BinOpType::GT:
+    opStr = ">";
+    break;
+  }
+  return "(" + left->toString() + " " + opStr + " " + right->toString() + ")";
+}
+
 bool BinOp::isEqual(const Expr &other) const { return false; }
 
 UnOp::UnOp(UnOpType op, std::unique_ptr<Expr> expr)
@@ -208,6 +236,16 @@ UnOp::UnOp(UnOpType op, std::unique_ptr<Expr> expr)
 
 std::unique_ptr<Expr> UnOp::clone() const {
   return std::make_unique<UnOp>(this->op, this->expr->clone());
+}
+
+std::string UnOp::toString() const {
+  const char *opStr;
+  switch (op) {
+  case UnOpType::NOT:
+    opStr = "!";
+    break;
+  }
+  return std::string(opStr) + expr->toString();
 }
 
 bool UnOp::isEqual(const Expr &other) const { return false; }
@@ -218,6 +256,8 @@ VarUse::VarUse(std::string varName)
 std::unique_ptr<Expr> VarUse::clone() const {
   return std::make_unique<VarUse>(this->name);
 }
+
+std::string VarUse::toString() const { return name; }
 
 bool VarUse::isEqual(const Expr &other) const { return false; }
 

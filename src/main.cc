@@ -36,9 +36,15 @@ int main() {
       std::make_unique<VariantConstr>("NonZero", std::move(variantConstrArgs1));
   auto stmt3 =
       std::make_unique<Assign>(std::move("v1"), std::move(variantConstr1));
+  // create int x = 52 and assign to v2
+  auto decl3 =
+      std::make_unique<Decl>(std::move("z"), std::make_unique<IntType>());
+  auto stmtZ =
+      std::make_unique<Assign>(std::move("z"), std::make_unique<Num>(52));
   std::vector<std::unique_ptr<Expr>> variantConstrArgs2 =
       std::vector<std::unique_ptr<Expr>>();
-  variantConstrArgs2.push_back(std::move(std::make_unique<Num>(42)));
+  // variantConstrArgs2.push_back(std::move(std::make_unique<VarUse>("z")));
+  variantConstrArgs2.push_back(std::move(std::make_unique<Num>(52)));
   auto variantConstr2 =
       std::make_unique<VariantConstr>("NonZero", std::move(variantConstrArgs2));
   auto stmt4 =
@@ -52,9 +58,11 @@ int main() {
   std::vector<std::unique_ptr<Stmt>> statements;
   statements.push_back(std::move(decl1));
   statements.push_back(std::move(decl2));
+  statements.push_back(std::move(decl3));
   statements.push_back(std::move(variant1));
   statements.push_back(std::move(declV1));
   statements.push_back(std::move(declV2));
+  statements.push_back(std::move(stmtZ));
   statements.push_back(std::move(stmt1));
   statements.push_back(std::move(stmt2));
   statements.push_back(std::move(stmt3));
