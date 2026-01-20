@@ -1,0 +1,293 @@
+
+\documentclass[11pt]{article}
+
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{mathpartir}
+\usepackage{geometry}
+\usepackage{hyperref}
+
+\geometry{margin=1in}
+
+\title{Language Definition}
+\author{}
+\date{}
+
+\begin{document}
+\maketitle
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Abstract Syntax}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{Values}
+\[
+\begin{array}{rcl}
+v \;\;::=& n \\
+        &|& b \\
+        &|& C(v_1,\dots,v_n) \\
+\end{array}
+\]
+
+where $n \in \mathbb{Z}$, $b \in \{\texttt{true}, \texttt{false}\}$, and $C$ is a constructor name.
+
+\subsection{Types}
+
+\[
+\begin{array}{rcl}
+T \;\;::=& \texttt{int} \\
+        &|& \texttt{bool} \\
+        &|& V \\
+\end{array}
+\]
+
+
+Variant types are labeled sums:
+
+\[
+V ::= \langle C_1 : \overline{T_1}, \dots, C_n : \overline{T_n} \rangle
+\]
+
+where each $\overline{T_i}$ denotes a (possibly empty) sequence of types and $C_i$ are
+constructor names.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Expressions}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\[
+\begin{array}{rcl}
+e \;\;::=& v
+\\ &|& e_1 \;\texttt{op}\; e_2
+\\ &|& \texttt{!}\; e
+\\ &|& x
+\end{array}
+\]
+
+where $\texttt{op} \in \{ +, -, *, /, \land, \lor, ==, <, > \}$ and $x$ is a variable name.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Statements}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\[
+\begin{array}{rcl}
+s \;\;::=& \texttt{var } x : T
+\\ &|& x := e
+\\ &|& \texttt{if } e \;\{ s^* \}
+\\ &|& \texttt{if } e \;\{ s^* \}\; \texttt{else } \{ s^* \}
+\\ &|& \texttt{print } e
+\\ &|& \texttt{variant } V = C_1(\overline{T_1}) \mid \dots \mid C_n(\overline{T_n})
+\end{array}
+\]
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Typing Rules}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\[ 
+\Gamma \vdash e : T
+\]
+\[
+\Delta \vdash C : (\overline{T}) : V
+\]
+\subsection{Base Types}
+
+\begin{mathpar}
+\inferrule*[right=T-Int]
+{ }
+{\Gamma \vdash n : \texttt{int}}
+
+\inferrule*[right=T-Bool-True]
+{ }
+{\Gamma \vdash \texttt{true} : \texttt{bool}}
+
+\inferrule*[right=T-Bool-False]
+{ }
+{\Gamma \vdash \texttt{false} : \texttt{bool}}
+\end{mathpar}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Variables}
+
+\begin{mathpar}
+\inferrule*[right=T-Var-Use]
+{x : T \in \Gamma}
+{\Gamma \vdash x : T}
+\end{mathpar}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Binary Operators}
+
+\begin{mathpar}
+\inferrule*[right=T-Arithmetic]
+{\Gamma \vdash e_1 : \texttt{int} \\ \Gamma \vdash e_2 : \texttt{int}}
+{\Gamma \vdash e_1 + e_2 : \texttt{int}}
+
+\inferrule*[right=T-Logical]
+{\Gamma \vdash e_1 : \texttt{bool} \\ \Gamma \vdash e_2 : \texttt{bool}}
+{\Gamma \vdash e_1 \land e_2 : \texttt{bool}}
+
+\inferrule*[right=T-Comparison]
+{\Gamma \vdash e_1 : \texttt{int} \\ \Gamma \vdash e_2 : \texttt{int}}
+{\Gamma \vdash e_1 \textless e_2 : \texttt{bool}}
+
+\inferrule*[right=T-Equality]
+{\Gamma \vdash e_1 : T \\ \Gamma \vdash e_2 : T}
+{\Gamma \vdash e_1 == e_2 : \texttt{bool}}
+\end{mathpar}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Unary Operators}
+
+\begin{mathpar}
+\inferrule*[right=T-Not]
+{\Gamma \vdash e : \texttt{bool}}
+{\Gamma \vdash \texttt{not } e : \texttt{bool}}
+\end{mathpar}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Variants}
+
+\begin{mathpar}
+\inferrule*[right=T-Variant-Constructor]
+{
+\Gamma \vdash e_1 : T_1 ,\cdots, e_n : T_n \\ 
+\Delta \vdash C : (T_1,\dots,T_n) : V
+}
+{
+\Gamma, \Delta \vdash C(e_1,\dots,e_n) : V
+}
+\end{mathpar}
+
+The constructor $C$ must be declared as part of variant $V$ with argument
+types $(T_1,\dots,T_n)$.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Operational Semantics}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+The operational semantics are given as a big-step evaluation relation:
+\[
+\langle e, \sigma \rangle \Downarrow v
+\]
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Base Values}
+
+\begin{mathpar}
+\inferrule*[right=E-Int]
+{ }
+{\langle n, \sigma \rangle \Downarrow n}
+
+\inferrule*[right=E-Bool]
+{ }
+{\langle \texttt{b}, \sigma \rangle \Downarrow \texttt{b}}
+\end{mathpar}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Variables}
+
+\begin{mathpar}
+\inferrule*[right=E-Var]
+{\sigma(x) = v}
+{\langle x, \sigma \rangle \Downarrow v}
+\end{mathpar}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Operations}
+
+\begin{mathpar}
+\inferrule
+{
+\langle e_1, \sigma \rangle \Downarrow n_1 \\
+\langle e_2, \sigma \rangle \Downarrow n_2
+}
+{
+\langle e_1 + e_2, \sigma \rangle \Downarrow n_1 + n_2
+}
+\end{mathpar}
+
+\begin{mathpar}
+\inferrule
+{
+\langle e_1, \sigma \rangle \Downarrow b_1 \\
+\langle e_2, \sigma \rangle \Downarrow b_2
+}
+{
+\langle e_1 \land e_2, \sigma \rangle \Downarrow b_1 \land b_2
+}
+\end{mathpar}
+
+\begin{mathpar}
+\inferrule
+{
+\langle e, \sigma \rangle \Downarrow b
+}
+{
+\langle \texttt{!} e, \sigma \rangle \Downarrow \neg b
+}
+\end{mathpar}
+
+\begin{mathpar}
+\inferrule
+{
+\langle e_1, \sigma \rangle \Downarrow n_1 \\
+\langle e_2, \sigma \rangle \Downarrow n_2
+}
+{
+\langle e_1 \textless e_2, \sigma \rangle \Downarrow (n_1 < n_2)
+}
+\end{mathpar}
+
+\begin{mathpar}
+\inferrule
+{
+\langle e_1, \sigma \rangle \Downarrow v_1 \\
+\langle e_2, \sigma \rangle \Downarrow v_2
+}
+{
+\langle e_1 == e_2, \sigma \rangle \Downarrow (v_1 == v_2)
+}
+\end{mathpar}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Variants}
+
+\begin{mathpar}
+\inferrule
+{
+\langle e_1, \sigma \rangle \Downarrow v_1 \\
+\cdots \\
+\langle e_n, \sigma \rangle \Downarrow v_n
+}
+{
+\langle C(e_1,\dots,e_n), \sigma \rangle \Downarrow C(v_1,\dots,v_n)
+}
+\end{mathpar}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Statements}
+
+Statement execution is defined as:
+\[
+\langle s, \sigma \rangle \Downarrow \sigma'
+\]
+
+\begin{mathpar}
+\inferrule
+{\langle e, \sigma \rangle \Downarrow v}
+{\langle x := e, \sigma \rangle \Downarrow \sigma[x \mapsto v]}
+\end{mathpar}
+
+\begin{mathpar}
+\inferrule
+{\langle e, \sigma \rangle \Downarrow \texttt{true}}
+{\langle \texttt{if } e \{ s^* \}, \sigma \rangle \Downarrow \sigma'}
+\end{mathpar}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Conclusion}
+
+This document formally specifies the abstract syntax, typing rules, and
+operational semantics of the language as implemented in the provided C++
+source files.
+
+\end{document}
