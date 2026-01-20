@@ -3,9 +3,7 @@
 #include <iostream>
 #include <stdexcept>
 
-Interpreter::Interpreter() : scope(0), currentExpr(nullptr) {
-  valEnvs.emplace_back();
-}
+Interpreter::Interpreter() = default;
 
 void Interpreter::visitProgram(Program *program) {
   for (auto &stmt : program->statements) {
@@ -111,7 +109,7 @@ void Interpreter::visitUnOp(UnOp *unOp) {
 }
 
 void Interpreter::visitVarUse(VarUse *varUse) {
-  currentExpr = valEnvs[scope].get(varUse->name);
+  currentExpr = valEnv.get(varUse->name);
   if (currentExpr == nullptr) {
     throw std::runtime_error("Runtime error: Undefined variable: " +
                              varUse->name);
@@ -133,7 +131,7 @@ void Interpreter::visitAssign(Assign *assign) {
     break;
   }
   Expr *rightValue = currentExpr;
-  valEnvs[scope].put(assign->left, rightValue);
+  valEnv.put(assign->left, rightValue);
 }
 
 void Interpreter::visitIf(If *ifStmt) {

@@ -5,8 +5,7 @@
 
 class Interpreter : public Visitor {
 private:
-  std::vector<ValueEnvironment> valEnvs;
-  int scope;
+  ValueEnvironment valEnv;
   Expr *currentExpr;
 
 protected:

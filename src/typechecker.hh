@@ -2,12 +2,10 @@
 
 #include "env.hh"
 #include "visitor.hh"
-#include <vector>
 
 class TypeChecker : public Visitor {
 private:
-  std::vector<TypeEnvironment> typeEnvs;
-  int scope;
+  TypeEnvironment typeEnv;
   TypeExpr *currentTypeExpr;
 
 protected:
@@ -22,9 +20,8 @@ protected:
   void visitVariant(Variant *variant) override;
   void visitAssign(Assign *assign) override;
   void visitIf(If *ifStmt) override;
-  void visitIfElse(IfElse *ifElseStmt) override;
-  void visitMatch(Match *match) override;
   void visitPrint(Print *print) override;
+  void visitIfElse(IfElse *ifElseStmt) override;
 
 public:
   TypeChecker();

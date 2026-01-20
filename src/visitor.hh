@@ -23,6 +23,5 @@ protected:
   virtual void visitAssign(Assign *assign) = 0;
   virtual void visitIf(If *ifStmt) = 0;
   virtual void visitIfElse(IfElse *ifElseStmt) = 0;
-  virtual void visitMatch(Match *match) = 0;
   virtual void visitPrint(Print *print) = 0;
 };

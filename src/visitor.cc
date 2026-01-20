@@ -40,10 +40,6 @@ void Visitor::visit(Stmt *stmt) {
   case StmtType::IF_ELSE:
     visitIfElse(static_cast<IfElse *>(stmt));
     break;
-  case StmtType::MATCH:
-    visitMatch(static_cast<Match *>(stmt));
-    ;
-    break;
   case StmtType::PRINT:
     visitPrint(static_cast<Print *>(stmt));
     break;

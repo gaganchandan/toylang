@@ -53,6 +53,8 @@ void Printer::visitVariant(Variant *variant) {
   }
 }
 
+// void Printer::visitVariant(Variant *variant) {}
+
 void Printer::visitAssign(Assign *assign) {
   std::cout << assign->left << " = ";
   visit(assign->right.get());
@@ -84,22 +86,6 @@ void Printer::visitIfElse(IfElse *ifElseStmt) {
   for (const auto &stmt : ifElseStmt->elseStmts) {
     visit(stmt.get());
     std::cout << std::endl;
-  }
-  std::cout << "}";
-}
-
-void Printer::visitMatch(Match *match) {
-  std::cout << "match (";
-  visit(match->expr.get());
-  std::cout << ") {" << std::endl;
-  for (const auto &casePair : match->cases) {
-    std::cout << "  | " << casePair.first->toString() << "=> {" << std::endl;
-    for (const auto &stmt : casePair.second) {
-      std::cout << "    ";
-      visit(stmt.get());
-      std::cout << std::endl;
-    }
-    std::cout << "  }" << std::endl;
   }
   std::cout << "}";
 }
