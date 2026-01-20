@@ -26,12 +26,16 @@ void TypeChecker::visitVariantConstr(VariantConstr *variantConstr) {
     visit(&*arg);
     typeExprs.push_back(currentTypeExpr->clone());
   }
-  // VariantConstrType *variantConstrType =
-  //     new VariantConstrType(variantConstr->constr, std::move(typeExprs));
 
   VariantConstrType variantConstrType(variantConstr->constr,
                                       std::move(typeExprs));
-  currentTypeExpr = typeEnvs[scope].getConstrType(std::move(variantConstrType));
+  currentTypeExpr = nullptr;
+  for (int i = scope; i >= 0; --i) {
+    currentTypeExpr = typeEnvs[i].getConstrType(variantConstrType);
+    if (currentTypeExpr != nullptr) {
+      break;
+    }
+  }
   if (currentTypeExpr == nullptr) {
     throw std::runtime_error("Undefined variant constructor: " +
                              variantConstr->constr);
@@ -93,7 +97,13 @@ void TypeChecker::visitUnOp(UnOp *unOp) {
 }
 
 void TypeChecker::visitVarUse(VarUse *varUse) {
-  currentTypeExpr = typeEnvs[scope].get(varUse->name);
+  currentTypeExpr = nullptr;
+  for (int i = scope; i >= 0; --i) {
+    currentTypeExpr = typeEnvs[i].get(varUse->name);
+    if (currentTypeExpr != nullptr) {
+      break;
+    }
+  }
   if (currentTypeExpr == nullptr) {
     throw std::runtime_error("Undefined variable: " + varUse->name);
   }
@@ -124,7 +134,14 @@ void TypeChecker::visitVariant(Variant *variant) {
 void TypeChecker::visitAssign(Assign *assign) {
   visit(assign->right.get());
   auto rightType = currentTypeExpr;
-  auto leftType = typeEnvs[scope].get(assign->left);
+  // auto leftType = typeEnvs[scope].get(assign->left);
+  TypeExpr *leftType = nullptr;
+  for (int i = scope; i >= 0; --i) {
+    leftType = typeEnvs[i].get(assign->left);
+    if (leftType != nullptr) {
+      break;
+    }
+  }
   if (leftType == nullptr) {
     throw std::runtime_error("Undefined variable: " + assign->left);
   }
