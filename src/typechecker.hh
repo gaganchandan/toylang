@@ -2,10 +2,12 @@
 
 #include "env.hh"
 #include "visitor.hh"
+#include <vector>
 
 class TypeChecker : public Visitor {
 private:
-  TypeEnvironment typeEnv;
+  std::vector<TypeEnvironment> typeEnvs;
+  int scope;
   TypeExpr *currentTypeExpr;
 
 protected:
