@@ -276,6 +276,33 @@ Variant::Variant(
 Assign::Assign(std::string left, std::unique_ptr<Expr> right)
     : Stmt(StmtType::ASSIGN), left(std::move(left)), right(std::move(right)) {}
 
+VariantConstrMatch::VariantConstrMatch(std::string constr,
+                                       std::vector<std::unique_ptr<Decl>> args)
+    : constr(std::move(constr)), args(std::move(args)) {}
+
+std::string VariantConstrMatch::toString() const {
+  std::ostringstream oss;
+  oss << constr << "(";
+  if (args.size() == 0) {
+    oss << ")";
+    return oss.str();
+  }
+  for (size_t i = 0; i < args.size(); i++) {
+    oss << args[i]->type->toString() << " " << args[i]->name;
+    if (i != args.size() - 1) {
+      oss << ", ";
+    }
+  }
+  oss << ")";
+  return oss.str();
+}
+
+Match::Match(std::unique_ptr<Expr> expr,
+             std::map<std::unique_ptr<VariantConstrMatch>,
+                      std::vector<std::unique_ptr<Stmt>>>
+                 cases)
+    : Stmt(StmtType::MATCH), expr(std::move(expr)), cases(std::move(cases)) {}
+
 If::If(std::unique_ptr<Expr> condition,
        std::vector<std::unique_ptr<Stmt>> thenStmts)
     : Stmt(StmtType::IF), condition(std::move(condition)),

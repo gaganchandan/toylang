@@ -1,5 +1,6 @@
 #include "typechecker.hh"
 #include "ast.hh"
+#include "env.hh"
 #include <iostream>
 #include <stdexcept>
 
@@ -100,6 +101,7 @@ void TypeChecker::visitDecl(Decl *decl) {
   currentTypeExpr = typeEnv.get(decl->name);
   if (currentTypeExpr == nullptr) {
     typeEnv.put(decl->name, decl->type->clone().release());
+    currentTypeExpr = decl->type->clone().release();
   } else {
     throw std::runtime_error("Cannot redefine variable: " + decl->name);
   }
@@ -153,6 +155,23 @@ void TypeChecker::visitIfElse(IfElse *ifElseStmt) {
   }
   for (const auto &stmt : ifElseStmt->elseStmts) {
     visit(stmt.get());
+  }
+}
+
+void TypeChecker::visitMatch(Match *match) {
+  visit(match->expr.get());
+  auto exprType = currentTypeExpr;
+  if (exprType->typeExprType != TypeExprType::VARIANT_TYPE) {
+    throw std::runtime_error("Match expression must be of variant type");
+  }
+  for (const auto &casePair : match->cases) {
+    auto localTypeEnv = new TypeEnvironment();
+    for (auto &decl : casePair.second) {
+    }
+    // Check if key with ->constr == casePair.first->constr exists in typeEnv
+    for (const auto &stmt : casePair.second) {
+      visit(stmt.get());
+    }
   }
 }
 

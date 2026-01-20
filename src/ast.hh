@@ -18,7 +18,7 @@ enum class BinOpType { ADD, SUB, MUL, DIV, AND, OR, EQ, LT, GT };
 
 enum class UnOpType { NOT };
 
-enum class StmtType { DECL, VARIANT, ASSIGN, IF, IF_ELSE, PRINT };
+enum class StmtType { DECL, VARIANT, ASSIGN, IF, IF_ELSE, MATCH, PRINT };
 
 // Type Expressions
 class TypeExpr {
@@ -224,6 +224,29 @@ public:
 public:
   IfElse(std::unique_ptr<Expr>, std::vector<std::unique_ptr<Stmt>>,
          std::vector<std::unique_ptr<Stmt>>);
+};
+
+class VariantConstrMatch {
+public:
+  const std::string constr;
+  std::vector<std::unique_ptr<Decl>> args;
+
+public:
+  VariantConstrMatch(std::string, std::vector<std::unique_ptr<Decl>>);
+  // std::unique_ptr<Expr> clone();
+  std::string toString() const;
+};
+
+class Match : public Stmt {
+public:
+  const std::unique_ptr<Expr> expr;
+  std::map<std::unique_ptr<VariantConstrMatch>,
+           std::vector<std::unique_ptr<Stmt>>>
+      cases;
+
+public:
+  Match(std::unique_ptr<Expr>, std::map<std::unique_ptr<VariantConstrMatch>,
+                                        std::vector<std::unique_ptr<Stmt>>>);
 };
 
 class Print : public Stmt {
