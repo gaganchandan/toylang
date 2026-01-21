@@ -28,7 +28,7 @@ void TypeChecker::visitVariantConstr(VariantConstr *variantConstr) {
 
   VariantConstrType variantConstrType(variantConstr->constr,
                                       std::move(typeExprs));
-  currentTypeExpr = typeEnv.getConstrType(std::move(variantConstrType));
+  currentTypeExpr = typeEnv.getConstrType(variantConstrType);
   if (currentTypeExpr == nullptr) {
     throw std::runtime_error("Undefined variant constructor: " +
                              variantConstr->constr);

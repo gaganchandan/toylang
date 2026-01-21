@@ -40,7 +40,7 @@ void TypeEnvironment::newVariant(VariantConstrType constr,
   variants.emplace(std::move(constr), std::move(variant));
 }
 
-TypeExpr *TypeEnvironment::getConstrType(VariantConstrType constr) {
+TypeExpr *TypeEnvironment::getConstrType(VariantConstrType &constr) {
   auto found = variants.find(constr);
   if (found != variants.end()) {
     return &found->second;

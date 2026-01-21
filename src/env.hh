@@ -24,5 +24,5 @@ public:
   TypeExpr *get(const std::string &key);
   bool checkVariant(VariantType);
   void newVariant(VariantConstrType constr, VariantType variant);
-  TypeExpr *getConstrType(VariantConstrType constr);
+  TypeExpr *getConstrType(VariantConstrType &constr);
 };
