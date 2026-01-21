@@ -27,11 +27,12 @@ void TypeChecker::visitVariantConstr(VariantConstr *variantConstr) {
     typeExprs.push_back(currentTypeExpr->clone());
   }
 
-  VariantConstrType variantConstrType(variantConstr->constr,
-                                      std::move(typeExprs));
+  VariantConstrType *variantConstrType =
+      new VariantConstrType(variantConstr->constr, std::move(typeExprs));
+
   currentTypeExpr = nullptr;
   for (int i = scope; i >= 0; --i) {
-    currentTypeExpr = typeEnvs[i].getConstrType(variantConstrType);
+    currentTypeExpr = typeEnvs[i].getConstrType(*std::move(variantConstrType));
     if (currentTypeExpr != nullptr) {
       break;
     }
@@ -184,13 +185,17 @@ void TypeChecker::visitMatch(Match *match) {
     throw std::runtime_error("Match expression must be of variant type");
   }
   for (const auto &casePair : match->cases) {
-    auto localTypeEnv = new TypeEnvironment();
+    typeEnvs.emplace_back();
+    scope++;
     for (auto &decl : casePair.second) {
+      visit(decl.get());
     }
     // Check if key with ->constr == casePair.first->constr exists in typeEnv
     for (const auto &stmt : casePair.second) {
       visit(stmt.get());
     }
+    typeEnvs.pop_back();
+    scope--;
   }
 }
 
