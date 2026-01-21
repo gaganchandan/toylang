@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.27 (TeX Live 2026/dev/Arch Linux) (preloaded format=pdflatex 2026.1.11)  20 JAN 2026 14:47
+This is pdfTeX, Version 3.141592653-2.6-1.40.27 (TeX Live 2026/dev/Arch Linux) (preloaded format=pdflatex 2026.1.11)  21 JAN 2026 10:15
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -352,21 +352,21 @@ LaTeX2e <2024-11-01> patch level 2
 L3 programming layer <2025-01-18>
  ***********
 Package rerunfilecheck Info: File `language.out' has not changed.
-(rerunfilecheck)             Checksum: E808BBBD640E8DE7DEA121CA8EA12098;1966.
+(rerunfilecheck)             Checksum: 694A6C90115870A3CAFC844523CA490B;1886.
  ) 
 Here is how much of TeX's memory you used:
- 9673 strings out of 475171
- 145534 string characters out of 5767095
- 553203 words of memory out of 5000000
- 32557 multiletter control sequences out of 15000+600000
+ 9671 strings out of 475171
+ 145524 string characters out of 5767095
+ 553208 words of memory out of 5000000
+ 32556 multiletter control sequences out of 15000+600000
  567046 words of font info for 68 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
  75i,15n,79p,545b,459s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmcsc10.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi8.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmr17.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt10.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb>
-Output written on language.pdf (3 pages, 123458 bytes).
+Output written on language.pdf (3 pages, 123246 bytes).
 PDF statistics:
- 154 PDF objects out of 1000 (max. 8388607)
- 125 compressed objects within 2 object streams
- 22 named destinations out of 1000 (max. 500000)
- 145 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 150 PDF objects out of 1000 (max. 8388607)
+ 121 compressed objects within 2 object streams
+ 21 named destinations out of 1000 (max. 500000)
+ 137 words of extra memory for PDF output out of 10000 (max. 10000000)
 

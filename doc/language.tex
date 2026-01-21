@@ -87,7 +87,7 @@ s \;\;::=& \texttt{var } x : T
 \Gamma \vdash e : T
 \]
 \[
-\Delta \vdash C : (\overline{T}) : V
+\Delta \vdash C(\overline{T}) : V
 \]
 \subsection{Base Types}
 
@@ -151,7 +151,7 @@ s \;\;::=& \texttt{var } x : T
 \inferrule*[right=T-Variant-Constructor]
 {
 \Gamma \vdash e_1 : T_1 ,\cdots, e_n : T_n \\ 
-\Delta \vdash C : (T_1,\dots,T_n) : V
+C : (T_1,\dots,T_n) : V \in \Delta
 }
 {
 \Gamma, \Delta \vdash C(e_1,\dots,e_n) : V
@@ -167,7 +167,7 @@ types $(T_1,\dots,T_n)$.
 
 The operational semantics are given as a big-step evaluation relation:
 \[
-\langle e, \sigma \rangle \Downarrow v
+\langle e, \sigma \rangle \to v
 \]
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -176,11 +176,11 @@ The operational semantics are given as a big-step evaluation relation:
 \begin{mathpar}
 \inferrule*[right=E-Int]
 { }
-{\langle n, \sigma \rangle \Downarrow n}
+{\langle n, \sigma \rangle \to n}
 
 \inferrule*[right=E-Bool]
 { }
-{\langle \texttt{b}, \sigma \rangle \Downarrow \texttt{b}}
+{\langle \texttt{b}, \sigma \rangle \to \texttt{b}}
 \end{mathpar}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -189,105 +189,116 @@ The operational semantics are given as a big-step evaluation relation:
 \begin{mathpar}
 \inferrule*[right=E-Var]
 {\sigma(x) = v}
-{\langle x, \sigma \rangle \Downarrow v}
+{\langle x, \sigma \rangle \to v}
 \end{mathpar}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Operations}
 
 \begin{mathpar}
-\inferrule
+\inferrule*[right=E-Arithmetic]
 {
-\langle e_1, \sigma \rangle \Downarrow n_1 \\
-\langle e_2, \sigma \rangle \Downarrow n_2
+\langle e_1, \sigma \rangle \to n_1 \\
+\langle e_2, \sigma \rangle \to n_2
 }
 {
-\langle e_1 + e_2, \sigma \rangle \Downarrow n_1 + n_2
-}
-\end{mathpar}
-
-\begin{mathpar}
-\inferrule
-{
-\langle e_1, \sigma \rangle \Downarrow b_1 \\
-\langle e_2, \sigma \rangle \Downarrow b_2
-}
-{
-\langle e_1 \land e_2, \sigma \rangle \Downarrow b_1 \land b_2
+\langle e_1 + e_2, \sigma \rangle \to n_1 + n_2
 }
 \end{mathpar}
 
 \begin{mathpar}
-\inferrule
+\inferrule*[right=E-Logical]
 {
-\langle e, \sigma \rangle \Downarrow b
+\langle e_1, \sigma \rangle \to b_1 \\
+\langle e_2, \sigma \rangle \to b_2
 }
 {
-\langle \texttt{!} e, \sigma \rangle \Downarrow \neg b
-}
-\end{mathpar}
-
-\begin{mathpar}
-\inferrule
-{
-\langle e_1, \sigma \rangle \Downarrow n_1 \\
-\langle e_2, \sigma \rangle \Downarrow n_2
-}
-{
-\langle e_1 \textless e_2, \sigma \rangle \Downarrow (n_1 < n_2)
+\langle e_1 \land e_2, \sigma \rangle \to b_1 \land b_2
 }
 \end{mathpar}
 
 \begin{mathpar}
-\inferrule
+\inferrule*[right=E-Not]
 {
-\langle e_1, \sigma \rangle \Downarrow v_1 \\
-\langle e_2, \sigma \rangle \Downarrow v_2
+\langle e, \sigma \rangle \to b
 }
 {
-\langle e_1 == e_2, \sigma \rangle \Downarrow (v_1 == v_2)
+\langle \texttt{!} e, \sigma \rangle \to \neg b
+}
+\end{mathpar}
+
+\begin{mathpar}
+    \inferrule*[right=E-Comparison]
+{
+\langle e_1, \sigma \rangle \to n_1 \\
+\langle e_2, \sigma \rangle \to n_2
+}
+{
+\langle e_1 \textless e_2, \sigma \rangle \to (n_1 < n_2)
+}
+\end{mathpar}
+
+\begin{mathpar}
+\inferrule*[right=E-Equality]
+{
+\langle e_1, \sigma \rangle \to v_1 \\
+\langle e_2, \sigma \rangle \to v_2
+}
+{
+\langle e_1 == e_2, \sigma \rangle \to (v_1 == v_2)
 }
 \end{mathpar}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Variants}
 
 \begin{mathpar}
-\inferrule
+\inferrule*[right=E-Variant-Constructor]
 {
-\langle e_1, \sigma \rangle \Downarrow v_1 \\
+\langle e_1, \sigma \rangle \to v_1 \\
 \cdots \\
-\langle e_n, \sigma \rangle \Downarrow v_n
+\langle e_n, \sigma \rangle \to v_n
 }
 {
-\langle C(e_1,\dots,e_n), \sigma \rangle \Downarrow C(v_1,\dots,v_n)
+\langle C(e_1,\dots,e_n), \sigma \rangle \to C(v_1,\dots,v_n)
 }
 \end{mathpar}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Statements}
+\subsection{Statements}
 
 Statement execution is defined as:
 \[
-\langle s, \sigma \rangle \Downarrow \sigma'
+\langle s, \sigma \rangle \to \sigma'
 \]
-
 \begin{mathpar}
-\inferrule
-{\langle e, \sigma \rangle \Downarrow v}
-{\langle x := e, \sigma \rangle \Downarrow \sigma[x \mapsto v]}
+\inferrule*[right=E-Assign]
+{\langle e, \sigma \rangle \to v}
+{\langle x := e, \sigma \rangle \to \sigma[x \mapsto v]}
 \end{mathpar}
 
 \begin{mathpar}
-\inferrule
-{\langle e, \sigma \rangle \Downarrow \texttt{true}}
-{\langle \texttt{if } e \{ s^* \}, \sigma \rangle \Downarrow \sigma'}
+    \inferrule*[right=E-If-True]
+    {\langle e, \sigma \rangle \to \texttt{true}\\ {\langle s^*, \sigma \rangle \to \sigma'}}
+{\langle \texttt{if } e \{ s^* \}, \sigma \rangle \to \sigma'}
+\end{mathpar}
+
+\begin{mathpar}
+    \inferrule*[right=E-If-False]
+{\langle e, \sigma \rangle \to \texttt{false}}
+{\langle \texttt{if } e \{ s^* \}, \sigma \rangle \to \sigma}
+\end{mathpar}
+
+\begin{mathpar}
+    \inferrule*[right=E-If-Else-True]
+    {\langle e, \sigma \rangle \to \texttt{true}\\ {\langle s_1^*, \sigma \rangle \to \sigma'}}
+{\langle \texttt{if } e \{ s_1^* \} \texttt{ else } \{ s_2^* \}, \sigma \rangle \to \sigma'}
+\end{mathpar}
+
+\begin{mathpar}
+    \inferrule*[right=E-If-Else-False]
+    {\langle e, \sigma \rangle \to \texttt{false}\\ {\langle s_2^*, \sigma \rangle \to \sigma'}}
+{\langle \texttt{if } e \{ s_1^* \} \texttt{ else } \{ s_2^* \}, \sigma \rangle \to \sigma'}
 \end{mathpar}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Conclusion}
-
-This document formally specifies the abstract syntax, typing rules, and
-operational semantics of the language as implemented in the provided C++
-source files.
-
 \end{document}
