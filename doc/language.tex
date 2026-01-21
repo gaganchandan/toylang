@@ -162,6 +162,48 @@ The constructor $C$ must be declared as part of variant $V$ with argument
 types $(T_1,\dots,T_n)$.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Statements}
+
+% For each statement, typing rules indicate that the statement is well-typed
+% under the given typing context.
+
+% \begin{mathpar}
+%     \inferrule*[right=T-Var-Decl]
+%     { x \notin \text{dom}(\Gamma) }
+%     {\Gamma \vdash \texttt{var } x : T \;\texttt{ok}}
+% \end{mathpar}
+
+% \begin{mathpar}
+%     \inferrule*[right=T-Variant-Decl]
+%     { V \notin \text{cod}(\Delta) }
+%     {\Delta \vdash \texttt{variant } V = C_1(\overline{T_1}) \mid \dots \mid C_n(\overline{T_n}) \;\texttt{ok}}
+% \end{mathpar}
+
+\begin{mathpar}
+    \inferrule*[right=T-Assign]
+    {\Gamma \vdash e : T \\ x : T \in \Gamma
+    }
+    {\Gamma \vdash x := e \;\texttt{ok}}
+\end{mathpar}
+
+\begin{mathpar}
+    \inferrule*[right=T-If]
+    {\Gamma \vdash e : \texttt{bool} \\ \Gamma \vdash s^* \;\texttt{ok}}
+    {\Gamma \vdash \texttt{if } e \{ s^* \} \;\texttt{ok}}
+\end{mathpar}
+
+\begin{mathpar}
+    \inferrule*[right=T-If-Else]
+    {\Gamma \vdash e : \texttt{bool} \\ \Gamma \vdash s_1^* \;\texttt{ok} \\ \Gamma \vdash s_2^* \;\texttt{ok}}
+    {\Gamma \vdash \texttt{if } e \{ s_1^* \} \texttt{ else } \{ s_2^* \} \;\texttt{ok}}
+\end{mathpar}
+
+\begin{mathpar}
+    \inferrule*[right=T-Print]
+    {\Gamma \vdash e : T}
+    {\Gamma \vdash \texttt{print } e \;\texttt{ok}}
+\end{mathpar}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Operational Semantics}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
