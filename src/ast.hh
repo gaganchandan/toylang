@@ -9,16 +9,25 @@ enum class TypeExprType {
   INT_TYPE,
   BOOL_TYPE,
   VARIANT_TYPE,
-  VARIANT_CONSTR_TYPE
+  VARIANT_CONSTR_TYPE,
+  RECORD_TYPE
 };
 
-enum class ExprType { NUM, BOOL, BINOP, UNOP, VAR_USE, VARIANT_CONSTR };
+enum class ExprType {
+  NUM,
+  BOOL,
+  BINOP,
+  UNOP,
+  VAR_USE,
+  VARIANT_CONSTR,
+  RECORD_VAL
+};
 
 enum class BinOpType { ADD, SUB, MUL, DIV, AND, OR, EQ, LT, GT };
 
 enum class UnOpType { NOT };
 
-enum class StmtType { DECL, VARIANT, ASSIGN, IF, IF_ELSE, PRINT };
+enum class StmtType { DECL, VARIANT, RECORD, ASSIGN, IF, IF_ELSE, PRINT };
 
 // Type Expressions
 class TypeExpr {
@@ -78,6 +87,19 @@ public:
   bool operator<(const VariantConstrType &other) const;
 };
 
+class RecordType : public TypeExpr {
+public:
+  const std::string name;
+  std::map<std::string, std::unique_ptr<TypeExpr>> fields;
+
+public:
+  RecordType(std::string, std::map<std::string, std::unique_ptr<TypeExpr>>);
+  RecordType(const RecordType &other);
+  std::unique_ptr<TypeExpr> clone() const override;
+  std::string toString() const override;
+  bool isEqual(const TypeExpr &other) const override;
+};
+
 // Expressions
 class Expr {
 public:
@@ -124,6 +146,17 @@ public:
 
 public:
   VariantConstr(std::string, std::vector<std::unique_ptr<Expr>>);
+  std::unique_ptr<Expr> clone() const override;
+  std::string toString() const override;
+  bool isEqual(const Expr &other) const override;
+};
+
+class RecordVal : public Expr {
+public:
+  std::map<std::string, std::unique_ptr<Expr>> fields;
+
+public:
+  explicit RecordVal(std::map<std::string, std::unique_ptr<Expr>>);
   std::unique_ptr<Expr> clone() const override;
   std::string toString() const override;
   bool isEqual(const Expr &other) const override;
@@ -195,6 +228,15 @@ public:
 public:
   Variant(std::string,
           std::map<std::string, std::vector<std::unique_ptr<TypeExpr>>>);
+};
+
+class Record : public Stmt {
+public:
+  const std::string name;
+  std::map<std::string, std::unique_ptr<TypeExpr>> fields;
+
+public:
+  Record(std::string, std::map<std::string, std::unique_ptr<TypeExpr>>);
 };
 
 class Assign : public Stmt {

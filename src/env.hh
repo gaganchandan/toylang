@@ -17,6 +17,7 @@ class TypeEnvironment {
 private:
   std::map<std::string, TypeExpr *> table;
   std::map<VariantConstrType, VariantType> variants;
+  std::vector<RecordType> records;
 
 public:
   TypeEnvironment();
@@ -24,5 +25,8 @@ public:
   TypeExpr *get(const std::string &key);
   bool checkVariant(VariantType);
   void newVariant(VariantConstrType constr, VariantType variant);
-  TypeExpr *getConstrType(VariantConstrType &constr);
+  TypeExpr *getVariant(VariantConstrType &constr);
+  bool checkRecord(RecordType record);
+  void newRecord(RecordType record);
+  TypeExpr *getRecord(RecordType &record);
 };

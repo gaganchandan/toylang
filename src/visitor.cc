@@ -11,6 +11,9 @@ void Visitor::visit(Expr *expr) {
   case ExprType::VARIANT_CONSTR:
     visitVariantConstr(static_cast<VariantConstr *>(expr));
     break;
+  case ExprType::RECORD_VAL:
+    visitRecordVal(static_cast<RecordVal *>(expr));
+    break;
   case ExprType::BINOP:
     visitBinOp(static_cast<BinOp *>(expr));
     break;
@@ -30,6 +33,9 @@ void Visitor::visit(Stmt *stmt) {
     break;
   case StmtType::VARIANT:
     visitVariant(static_cast<Variant *>(stmt));
+    break;
+  case StmtType::RECORD:
+    visitRecord(static_cast<Record *>(stmt));
     break;
   case StmtType::ASSIGN:
     visitAssign(static_cast<Assign *>(stmt));

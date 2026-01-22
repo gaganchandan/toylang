@@ -23,15 +23,25 @@ void TypeChecker::visitVariantConstr(VariantConstr *variantConstr) {
     visit(&*arg);
     typeExprs.push_back(currentTypeExpr->clone());
   }
-  // VariantConstrType *variantConstrType =
-  //     new VariantConstrType(variantConstr->constr, std::move(typeExprs));
-
   VariantConstrType variantConstrType(variantConstr->constr,
                                       std::move(typeExprs));
-  currentTypeExpr = typeEnv.getConstrType(variantConstrType);
+  currentTypeExpr = typeEnv.getVariant(variantConstrType);
   if (currentTypeExpr == nullptr) {
     throw std::runtime_error("Undefined variant constructor: " +
                              variantConstr->constr);
+  }
+}
+
+void TypeChecker::visitRecordVal(RecordVal *recordVal) {
+  std::map<std::string, std::unique_ptr<TypeExpr>> fields;
+  for (auto &field : recordVal->fields) {
+    visit(&*field.second);
+    fields[field.first] = currentTypeExpr->clone();
+  }
+  RecordType recordType("", std::move(fields));
+  currentTypeExpr = typeEnv.getRecord(recordType);
+  if (currentTypeExpr == nullptr) {
+    throw std::runtime_error("Undefined record type");
   }
 }
 
@@ -116,6 +126,8 @@ void TypeChecker::visitVariant(Variant *variant) {
     typeEnv.newVariant(std::move(*variantConstrType), std::move(*variantType));
   }
 }
+
+void TypeChecker::visitRecord(Record *record) {}
 
 void TypeChecker::visitAssign(Assign *assign) {
   visit(assign->right.get());

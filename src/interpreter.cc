@@ -16,12 +16,19 @@ void Interpreter::visitNum(Num *num) { currentExpr = num; }
 void Interpreter::visitBool(Bool *boolExpr) { currentExpr = boolExpr; }
 
 void Interpreter::visitVariantConstr(VariantConstr *variantConstr) {
-
   for (auto &arg : variantConstr->args) {
     visit(arg.get());
     arg = currentExpr->clone();
   }
   currentExpr = variantConstr;
+}
+
+void Interpreter::visitRecordVal(RecordVal *recordVal) {
+  for (auto &field : recordVal->fields) {
+    visit(field.second.get());
+    field.second = currentExpr->clone();
+  }
+  currentExpr = recordVal;
 }
 
 void Interpreter::visitBinOp(BinOp *binOp) {
@@ -75,6 +82,10 @@ void Interpreter::visitBinOp(BinOp *binOp) {
       currentExpr = new Bool(*static_cast<VariantConstr *>(leftExpr) ==
                              *static_cast<VariantConstr *>(rightExpr));
       break;
+    case ExprType::RECORD_VAL:
+      currentExpr = new Bool(*static_cast<RecordVal *>(leftExpr) ==
+                             *static_cast<RecordVal *>(rightExpr));
+      break;
     default:
       throw std::runtime_error(
           "Runtime error: Unsupported type for EQ operation");
@@ -119,6 +130,8 @@ void Interpreter::visitVarUse(VarUse *varUse) {
 void Interpreter::visitDecl(Decl *decl) {}
 
 void Interpreter::visitVariant(Variant *variant) {}
+
+void Interpreter::visitRecord(Record *record) {}
 
 void Interpreter::visitAssign(Assign *assign) {
   visit(assign->right.get());

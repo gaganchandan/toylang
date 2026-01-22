@@ -92,6 +92,50 @@ bool VariantConstrType::operator<(const VariantConstrType &other) const {
   return false;
 }
 
+RecordType::RecordType(std::string name,
+                       std::map<std::string, std::unique_ptr<TypeExpr>> fields)
+    : TypeExpr(TypeExprType::RECORD_TYPE), name(name),
+      fields(std::move(fields)) {}
+
+RecordType::RecordType(const RecordType &other)
+    : TypeExpr(TypeExprType::RECORD_TYPE), name(other.name) {
+  for (const auto &pair : other.fields) {
+    fields[pair.first] = pair.second->clone();
+  }
+}
+
+std::unique_ptr<TypeExpr> RecordType::clone() const {
+  std::map<std::string, std::unique_ptr<TypeExpr>> clonedFields;
+  for (const auto &pair : fields) {
+    clonedFields[pair.first] = pair.second->clone();
+  }
+  return std::make_unique<RecordType>(name, std::move(clonedFields));
+}
+
+std::string RecordType::toString() const { return name; }
+
+bool RecordType::isEqual(const TypeExpr &other) const {
+  const auto &o = static_cast<const RecordType &>(other);
+
+  if (name != o.name)
+    return false;
+  if (fields.size() != o.fields.size())
+    return false;
+
+  for (const auto &pair : fields) {
+    const auto &key = pair.first;
+    const auto &value = pair.second;
+
+    auto it = o.fields.find(key);
+    if (it == o.fields.end())
+      return false;
+
+    if (!(*value == *(it->second)))
+      return false;
+  }
+  return true;
+}
+
 // Expressions
 Expr::Expr(ExprType type) : exprType(type) {}
 
@@ -185,6 +229,55 @@ bool VariantConstr::isEqual(const Expr &other) const {
   return true;
 }
 
+RecordVal::RecordVal(std::map<std::string, std::unique_ptr<Expr>> fields)
+    : Expr(ExprType::RECORD_VAL), fields(std::move(fields)) {}
+
+std::unique_ptr<Expr> RecordVal::clone() const {
+  std::map<std::string, std::unique_ptr<Expr>> clonedFields;
+  for (const auto &pair : fields) {
+    clonedFields[pair.first] = pair.second->clone();
+  }
+  return std::make_unique<RecordVal>(std::move(clonedFields));
+}
+
+std::string RecordVal::toString() const {
+  std::ostringstream oss;
+  oss << "{";
+  size_t count = 0;
+  for (const auto &pair : fields) {
+    oss << pair.first << ": " << pair.second->toString();
+    if (count != fields.size() - 1) {
+      oss << ", ";
+    }
+    count++;
+  }
+  oss << "}";
+  return oss.str();
+}
+
+bool RecordVal::isEqual(const Expr &other) const {
+  const auto o = static_cast<const RecordVal *>(&other);
+
+  if (fields.size() != o->fields.size()) {
+    return false;
+  }
+
+  for (const auto &pair : fields) {
+    const auto &key = pair.first;
+    const auto &value = pair.second;
+
+    auto it = o->fields.find(key);
+    if (it == o->fields.end()) {
+      return false;
+    }
+
+    if (!(*value == *(it->second))) {
+      return false;
+    }
+  }
+  return true;
+}
+
 BinOp::BinOp(std::unique_ptr<Expr> left, BinOpType op,
              std::unique_ptr<Expr> right)
     : Expr(ExprType::BINOP), left(std::move(left)), op(op),
@@ -272,6 +365,11 @@ Variant::Variant(
     std::map<std::string, std::vector<std::unique_ptr<TypeExpr>>> constrs)
     : Stmt(StmtType::VARIANT), name(std::move(variantName)),
       constructors(std::move(constrs)) {}
+
+Record::Record(std::string recordName,
+               std::map<std::string, std::unique_ptr<TypeExpr>> fields)
+    : Stmt(StmtType::RECORD), name(std::move(recordName)),
+      fields(std::move(fields)) {}
 
 Assign::Assign(std::string left, std::unique_ptr<Expr> right)
     : Stmt(StmtType::ASSIGN), left(std::move(left)), right(std::move(right)) {}
