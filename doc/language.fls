@@ -141,8 +141,8 @@ INPUT /usr/share/texmf-dist/fonts/tfm/public/amsfonts/symbols/msbm10.tfm
 INPUT /usr/share/texmf-dist/fonts/tfm/public/cm/cmtt10.tfm
 INPUT /usr/share/texmf-dist/fonts/tfm/public/cm/cmtt8.tfm
 INPUT /usr/share/texmf-dist/fonts/tfm/public/cm/cmtt8.tfm
-INPUT /usr/share/texmf-dist/fonts/tfm/public/cm/cmcsc10.tfm
 INPUT /var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map
+INPUT /usr/share/texmf-dist/fonts/tfm/public/cm/cmcsc10.tfm
 INPUT /usr/share/texmf-dist/tex/latex/base/omlcmr.fd
 INPUT /usr/share/texmf-dist/tex/latex/base/omlcmr.fd
 INPUT /usr/share/texmf-dist/tex/latex/base/omlcmr.fd

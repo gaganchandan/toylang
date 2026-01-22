@@ -25,6 +25,7 @@
 v \;\;::=& n \\
         &|& b \\
         &|& C(v_1,\dots,v_n) \\
+        &|& {f_1: v_1, \dots, f_m: v_m} \\
 \end{array}
 \]
 
@@ -36,7 +37,8 @@ where $n \in \mathbb{Z}$, $b \in \{\texttt{true}, \texttt{false}\}$, and $C$ is 
 \begin{array}{rcl}
 T \;\;::=& \texttt{int} \\
         &|& \texttt{bool} \\
-        &|& V \\
+        &|& V \\ 
+        && R
 \end{array}
 \]
 
@@ -49,6 +51,13 @@ V ::= \langle C_1 : \overline{T_1}, \dots, C_n : \overline{T_n} \rangle
 
 where each $\overline{T_i}$ denotes a (possibly empty) sequence of types and $C_i$ are
 constructor names.
+
+Record types are labeled products:
+\[
+R ::= \{ f_1 : T_1, \dots, f_m : T_m \}
+\]
+
+where each $f_i$ is a field name and $T_i$ is its corresponding type.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Expressions}
@@ -77,6 +86,7 @@ s \;\;::=& \texttt{var } x : T
 \\ &|& \texttt{if } e \;\{ s^* \}\; \texttt{else } \{ s^* \}
 \\ &|& \texttt{print } e
 \\ &|& \texttt{variant } V = C_1(\overline{T_1}) \mid \dots \mid C_n(\overline{T_n})
+\\ &|& \texttt{record } R = \{f_1 : T_1, \dots, f_m : T_m\} 
 \end{array}
 \]
 
@@ -86,9 +96,13 @@ s \;\;::=& \texttt{var } x : T
 \[ 
 \Gamma \vdash e : T
 \]
-\[
-\Delta \vdash C(\overline{T}) : V
-\]
+% \[
+% \Delta \vdash C(\overline{T}) : V
+% \]
+% \[
+% \Delta \vdash \{ f_1 : T_1, \dots, f_m : T_m \} : R
+% \]
+
 \subsection{Base Types}
 
 \begin{mathpar}
@@ -145,21 +159,32 @@ s \;\;::=& \texttt{var } x : T
 \end{mathpar}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Variants}
+\subsection{User-Defined Types}
 
 \begin{mathpar}
 \inferrule*[right=T-Variant-Constructor]
 {
 \Gamma \vdash e_1 : T_1 ,\cdots, e_n : T_n \\ 
-C : (T_1,\dots,T_n) : V \in \Delta
+C : (T_1,\dots,T_n) \in \langle C_1 : \overline{T_1}, \dots, C_n : \overline{T_n} \rangle = V
 }
 {
-\Gamma, \Delta \vdash C(e_1,\dots,e_n) : V
+\Gamma \vdash C(e_1,\dots,e_n) : V
 }
 \end{mathpar}
 
-The constructor $C$ must be declared as part of variant $V$ with argument
-types $(T_1,\dots,T_n)$.
+% The constructor $C$ must be declared as part of variant $V$ with argument
+% types $(T_1,\dots,T_n)$.
+
+\begin{mathpar}
+\inferrule*[right=T-Record-Value]
+{
+\Gamma \vdash e_1 : T_1 ,\cdots, e_m : T_m \\ 
+R = \{ f_1 : T_1, \dots, f_m : T_m \}
+}
+{
+\Gamma \vdash \{ f_1 : e_1, \dots, f_m : e_m \} : R
+}
+\end{mathpar}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Statements}
@@ -290,6 +315,7 @@ The operational semantics are given as a big-step evaluation relation:
 \langle e_1 == e_2, \sigma \rangle \to (v_1 == v_2)
 }
 \end{mathpar}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Variants}
 
@@ -302,6 +328,20 @@ The operational semantics are given as a big-step evaluation relation:
 }
 {
 \langle C(e_1,\dots,e_n), \sigma \rangle \to C(v_1,\dots,v_n)
+}
+\end{mathpar}
+
+\subsection{Records}
+
+\begin{mathpar}
+\inferrule*[right=E-Record-Value]
+{
+    \langle e_1 \sigma \rangle \to v_1 \\
+    \cdots \\
+    \langle e_n, \sigma \rangle \to v_n
+}
+{
+    \langle \{ f_1 : e_1, \dots, f_n : e_n \}, \sigma \rangle \to \{ f_1 : v_1, \dots, f_n : v_n \}
 }
 \end{mathpar}
 
