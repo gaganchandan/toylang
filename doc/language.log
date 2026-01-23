@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.27 (TeX Live 2026/dev/Arch Linux) (preloaded format=pdflatex 2026.1.11)  21 JAN 2026 11:35
+This is pdfTeX, Version 3.141592653-2.6-1.40.27 (TeX Live 2026/dev/Arch Linux) (preloaded format=pdflatex 2026.1.11)  22 JAN 2026 13:15
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -323,26 +323,26 @@ File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 
 {/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}]
 
-LaTeX Warning: Command \textless invalid in math mode on input line 131.
+LaTeX Warning: Command \textless invalid in math mode on input line 145.
 
-LaTeX Font Info:    Trying to load font information for OML+cmr on input line 131.
+LaTeX Font Info:    Trying to load font information for OML+cmr on input line 145.
 (/usr/share/texmf-dist/tex/latex/base/omlcmr.fd
 File: omlcmr.fd 2024/11/19 v2.5n Standard LaTeX font definitions
 )
 LaTeX Font Info:    Font shape `OML/cmr/m/n' in size <10.95> not available
-(Font)              Font shape `OML/cmm/m/it' tried instead on input line 131.
+(Font)              Font shape `OML/cmm/m/it' tried instead on input line 145.
 
 
-LaTeX Warning: Command \textless invalid in math mode on input line 131.
+LaTeX Warning: Command \textless invalid in math mode on input line 145.
 
 
 
 [2]
 
-LaTeX Warning: Command \textless invalid in math mode on input line 280.
+LaTeX Warning: Command \textless invalid in math mode on input line 305.
 
 
-LaTeX Warning: Command \textless invalid in math mode on input line 280.
+LaTeX Warning: Command \textless invalid in math mode on input line 305.
 
 
 
@@ -354,21 +354,21 @@ LaTeX2e <2024-11-01> patch level 2
 L3 programming layer <2025-01-18>
  ***********
 Package rerunfilecheck Info: File `language.out' has not changed.
-(rerunfilecheck)             Checksum: 409536D6DCF0746027180A5A2DCDF0AE;1980.
+(rerunfilecheck)             Checksum: 046E274051B7A1D266BF9EC0881112D5;2126.
  ) 
 Here is how much of TeX's memory you used:
- 9674 strings out of 475171
- 145550 string characters out of 5767095
+ 9676 strings out of 475171
+ 145580 string characters out of 5767095
  553208 words of memory out of 5000000
- 32557 multiletter control sequences out of 15000+600000
+ 32558 multiletter control sequences out of 15000+600000
  567046 words of font info for 68 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
  75i,15n,79p,545b,459s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmcsc10.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi8.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmr17.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt10.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb>
-Output written on language.pdf (4 pages, 124602 bytes).
+Output written on language.pdf (4 pages, 128006 bytes).
 PDF statistics:
- 158 PDF objects out of 1000 (max. 8388607)
- 128 compressed objects within 2 object streams
- 23 named destinations out of 1000 (max. 500000)
- 145 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 162 PDF objects out of 1000 (max. 8388607)
+ 132 compressed objects within 2 object streams
+ 24 named destinations out of 1000 (max. 500000)
+ 153 words of extra memory for PDF output out of 10000 (max. 10000000)
 

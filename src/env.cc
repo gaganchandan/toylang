@@ -40,10 +40,38 @@ void TypeEnvironment::newVariant(VariantConstrType constr,
   variants.emplace(std::move(constr), std::move(variant));
 }
 
-TypeExpr *TypeEnvironment::getConstrType(VariantConstrType &constr) {
+TypeExpr *TypeEnvironment::getVariant(VariantConstrType &constr) {
   auto found = variants.find(constr);
   if (found != variants.end()) {
     return &found->second;
+  }
+  return nullptr;
+}
+
+bool TypeEnvironment::checkRecord(RecordType record) {
+  for (auto &rec : records) {
+    if (rec.fields == record.fields) {
+      return true;
+    }
+  }
+  return false;
+}
+
+void TypeEnvironment::newRecord(RecordType record) {
+  // Record Type has no copy constructor. Rebuild full record type and move it.
+  std::map<std::string, std::unique_ptr<TypeExpr>> newFields;
+  for (const auto &pair : record.fields) {
+    newFields[pair.first] = pair.second->clone();
+  }
+  RecordType newRecord(record.name, std::move(newFields));
+  records.push_back(std::move(newRecord));
+}
+
+TypeExpr *TypeEnvironment::getRecord(RecordType &record) {
+  for (auto &rec : records) {
+    if (rec == record) {
+      return &rec;
+    }
   }
   return nullptr;
 }

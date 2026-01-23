@@ -1,37 +1,23 @@
 #include "printer.hh"
 #include <iostream>
 
-Printer::Printer()
-    : binOpStrings({"+", "-", "*", "/", "&&", "||", "==", "<", ">"}),
-      unOpStrings({"!"}) {}
+Printer::Printer() = default;
 
-void Printer::visitNum(Num *num) { std::cout << num->value; }
+void Printer::visitNum(Num *num) { std::cout << num->toString(); }
 
-void Printer::visitBool(Bool *boolExpr) {
-  std::cout << (boolExpr->value ? "true" : "false");
-}
+void Printer::visitBool(Bool *boolExpr) { std::cout << boolExpr->toString(); }
 
 void Printer::visitVariantConstr(VariantConstr *variantConstr) {
-  std::cout << variantConstr->constr << "(";
-  for (size_t i = 0; i < variantConstr->args.size(); ++i) {
-    visit(variantConstr->args[i].get());
-    if (i != variantConstr->args.size() - 1) {
-      std::cout << ", ";
-    }
-  }
-  std::cout << ")";
+  std::cout << variantConstr->toString();
 }
 
-void Printer::visitBinOp(BinOp *binOp) {
-  visit(binOp->left.get());
-  std::cout << " " << binOpStrings[static_cast<int>(binOp->op)] << " ";
-  visit(binOp->right.get());
+void Printer::visitRecordVal(RecordVal *recordVal) {
+  std::cout << recordVal->toString();
 }
 
-void Printer::visitUnOp(UnOp *unOp) {
-  std::cout << unOpStrings[static_cast<int>(unOp->op)];
-  visit(unOp->expr.get());
-}
+void Printer::visitBinOp(BinOp *binOp) { std::cout << binOp->toString(); }
+
+void Printer::visitUnOp(UnOp *unOp) { std::cout << unOp->toString(); }
 
 void Printer::visitVarUse(VarUse *varUse) { std::cout << varUse->name; }
 
@@ -53,7 +39,14 @@ void Printer::visitVariant(Variant *variant) {
   }
 }
 
-// void Printer::visitVariant(Variant *variant) {}
+void Printer::visitRecord(Record *record) {
+  std::cout << "record " << record->name << " {" << std::endl;
+  for (auto &field : record->fields) {
+    std::cout << "  " << field.second->toString() << " " << field.first << ";"
+              << std::endl;
+  }
+  std::cout << "};";
+}
 
 void Printer::visitAssign(Assign *assign) {
   std::cout << assign->left << " = ";
