@@ -122,7 +122,13 @@ void Interpreter::visitUnOp(UnOp *unOp) {
 }
 
 void Interpreter::visitVarUse(VarUse *varUse) {
-  currentExpr = valEnvs[scope].get(varUse->name);
+  currentExpr = nullptr;
+  for (int i = scope; i >= 0; i--) {
+    currentExpr = valEnvs[i].get(varUse->name);
+    if (currentExpr != nullptr) {
+      break;
+    }
+  }
   if (currentExpr == nullptr) {
     throw std::runtime_error("Runtime error: Undefined variable: " +
                              varUse->name);

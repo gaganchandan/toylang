@@ -27,7 +27,14 @@ void TypeChecker::visitVariantConstr(VariantConstr *variantConstr) {
   }
   VariantConstrType variantConstrType(variantConstr->constr,
                                       std::move(typeExprs));
-  currentTypeExpr = typeEnvs[scope].getVariant(variantConstrType);
+  // currentTypeExpr = typeEnvs[scope].getVariant(variantConstrType);
+  currentTypeExpr = nullptr;
+  for (int i = 0; i <= scope; i++) {
+    currentTypeExpr = typeEnvs[i].getVariant(variantConstrType);
+    if (currentTypeExpr != nullptr) {
+      break;
+    }
+  }
   if (currentTypeExpr == nullptr) {
     throw std::runtime_error("Undefined variant constructor: " +
                              variantConstr->constr);
@@ -41,7 +48,13 @@ void TypeChecker::visitRecordVal(RecordVal *recordVal) {
     fields[field.first] = currentTypeExpr->clone();
   }
   RecordType recordType("", std::move(fields));
-  currentTypeExpr = typeEnvs[scope].getRecord(recordType);
+  currentTypeExpr = nullptr;
+  for (int i = 0; i <= scope; i++) {
+    currentTypeExpr = typeEnvs[i].getRecord(recordType);
+    if (currentTypeExpr != nullptr) {
+      break;
+    }
+  }
   if (currentTypeExpr == nullptr) {
     throw std::runtime_error("Undefined record type");
   }
@@ -102,7 +115,13 @@ void TypeChecker::visitUnOp(UnOp *unOp) {
 }
 
 void TypeChecker::visitVarUse(VarUse *varUse) {
-  currentTypeExpr = typeEnvs[scope].get(varUse->name);
+  currentTypeExpr = nullptr;
+  for (int i = scope; i >= 0; i--) {
+    currentTypeExpr = typeEnvs[i].get(varUse->name);
+    if (currentTypeExpr != nullptr) {
+      break;
+    }
+  }
   if (currentTypeExpr == nullptr) {
     throw std::runtime_error("Undefined variable: " + varUse->name);
   }
@@ -118,8 +137,15 @@ void TypeChecker::visitDecl(Decl *decl) {
 }
 
 void TypeChecker::visitVariant(Variant *variant) {
-  if (typeEnvs[scope].checkVariant(variant->name)) {
-    throw std::runtime_error("Cannot redefine variant: " + variant->name);
+  bool variantExists = false;
+  for (int i = 0; i <= scope; i++) {
+    if (typeEnvs[i].checkVariant(variant->name)) {
+      variantExists = true;
+      break;
+    }
+  }
+  if (variantExists) {
+    throw std::runtime_error("Cannot redefine variant type: " + variant->name);
   }
   for (auto &constr : variant->constructors) {
     auto variantConstrType = std::make_unique<VariantConstrType>(
@@ -130,12 +156,40 @@ void TypeChecker::visitVariant(Variant *variant) {
   }
 }
 
-void TypeChecker::visitRecord(Record *record) {}
+void TypeChecker::visitRecord(Record *record) {
+  bool recordExists = false;
+  std::map<std::string, std::unique_ptr<TypeExpr>> clonedFields;
+  for (auto &field : record->fields) {
+    clonedFields[field.first] = field.second->clone();
+  }
+  RecordType recordType(record->name, std::move(clonedFields));
+  for (int i = 0; i <= scope; i++) {
+    if (typeEnvs[i].checkRecord(recordType)) {
+      recordExists = true;
+      break;
+    }
+  }
+  if (recordExists) {
+    throw std::runtime_error("Cannot redefine record type: " + record->name);
+  }
+  std::map<std::string, std::unique_ptr<TypeExpr>> fields;
+  for (auto &field : record->fields) {
+    fields[field.first] = field.second->clone();
+  }
+  typeEnvs[scope].newRecord(std::move(recordType));
+}
 
 void TypeChecker::visitAssign(Assign *assign) {
   visit(assign->right.get());
   auto rightType = currentTypeExpr;
-  auto leftType = typeEnvs[scope].get(assign->left);
+  currentTypeExpr = nullptr;
+  for (int i = scope; i >= 0; i--) {
+    currentTypeExpr = typeEnvs[i].get(assign->left);
+    if (currentTypeExpr != nullptr) {
+      break;
+    }
+  }
+  auto leftType = currentTypeExpr;
   if (leftType == nullptr) {
     throw std::runtime_error("Undefined variable: " + assign->left);
   }
