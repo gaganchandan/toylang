@@ -14,6 +14,9 @@ void Visitor::visit(Expr *expr) {
   case ExprType::RECORD_VAL:
     visitRecordVal(static_cast<RecordVal *>(expr));
     break;
+  case ExprType::FIELD_ACCESS:
+    visitFieldAccess(static_cast<FieldAccess *>(expr));
+    break;
   case ExprType::BINOP:
     visitBinOp(static_cast<BinOp *>(expr));
     break;

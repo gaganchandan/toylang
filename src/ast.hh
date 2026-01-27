@@ -20,7 +20,8 @@ enum class ExprType {
   UNOP,
   VAR_USE,
   VARIANT_CONSTR,
-  RECORD_VAL
+  RECORD_VAL,
+  FIELD_ACCESS
 };
 
 enum class BinOpType { ADD, SUB, MUL, DIV, AND, OR, EQ, LT, GT };
@@ -157,6 +158,18 @@ public:
 
 public:
   explicit RecordVal(std::map<std::string, std::unique_ptr<Expr>>);
+  std::unique_ptr<Expr> clone() const override;
+  std::string toString() const override;
+  bool isEqual(const Expr &other) const override;
+};
+
+class FieldAccess : public Expr {
+public:
+  const std::string var;
+  const std::string field;
+
+public:
+  FieldAccess(std::string, std::string);
   std::unique_ptr<Expr> clone() const override;
   std::string toString() const override;
   bool isEqual(const Expr &other) const override;

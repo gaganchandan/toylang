@@ -60,6 +60,25 @@ void TypeChecker::visitRecordVal(RecordVal *recordVal) {
   }
 }
 
+void TypeChecker::visitFieldAccess(FieldAccess *recordAccess) {
+  currentTypeExpr = nullptr;
+  for (int i = scope; i >= 0; i--) {
+    currentTypeExpr = typeEnvs[i].get(recordAccess->var);
+    if (currentTypeExpr != nullptr) {
+      break;
+    }
+  }
+  auto recordType = dynamic_cast<RecordType *>(currentTypeExpr);
+  if (recordType == nullptr) {
+    throw std::runtime_error("Variable is not a record: " + recordAccess->var);
+  }
+  auto it = recordType->fields.find(recordAccess->field);
+  if (it == recordType->fields.end()) {
+    throw std::runtime_error("Undefined field: " + recordAccess->field);
+  }
+  currentTypeExpr = it->second->clone().release();
+}
+
 void TypeChecker::visitBinOp(BinOp *binOp) {
   visit(binOp->left.get());
   auto leftType = currentTypeExpr;

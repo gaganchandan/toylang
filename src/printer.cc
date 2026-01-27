@@ -15,6 +15,10 @@ void Printer::visitRecordVal(RecordVal *recordVal) {
   std::cout << recordVal->toString();
 }
 
+void Printer::visitFieldAccess(FieldAccess *recordAccess) {
+  std::cout << recordAccess->toString();
+}
+
 void Printer::visitBinOp(BinOp *binOp) { std::cout << binOp->toString(); }
 
 void Printer::visitUnOp(UnOp *unOp) { std::cout << unOp->toString(); }

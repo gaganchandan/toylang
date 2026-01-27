@@ -33,6 +33,12 @@ void Interpreter::visitRecordVal(RecordVal *recordVal) {
   currentExpr = recordVal;
 }
 
+void Interpreter::visitFieldAccess(FieldAccess *recordAccess) {
+  visitVarUse(new VarUse(recordAccess->var));
+  auto recordVal = static_cast<RecordVal *>(currentExpr);
+  visit(recordVal->fields[recordAccess->field].get());
+}
+
 void Interpreter::visitBinOp(BinOp *binOp) {
   visit(binOp->left.get());
   auto leftExpr = currentExpr;

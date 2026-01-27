@@ -278,6 +278,21 @@ bool RecordVal::isEqual(const Expr &other) const {
   return true;
 }
 
+FieldAccess::FieldAccess(std::string name, std::string field)
+    : Expr(ExprType::FIELD_ACCESS), var(std::move(name)),
+      field(std::move(field)) {}
+
+std::unique_ptr<Expr> FieldAccess::clone() const {
+  return std::make_unique<FieldAccess>(this->var, this->field);
+}
+
+std::string FieldAccess::toString() const { return var + "." + field; }
+
+bool FieldAccess::isEqual(const Expr &other) const {
+  const auto o = static_cast<const FieldAccess *>(&other);
+  return this->var == o->var && this->field == o->field;
+}
+
 BinOp::BinOp(std::unique_ptr<Expr> left, BinOpType op,
              std::unique_ptr<Expr> right)
     : Expr(ExprType::BINOP), left(std::move(left)), op(op),

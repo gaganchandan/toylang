@@ -14,6 +14,7 @@ protected:
   void visitBool(Bool *boolExpr) override;
   void visitVariantConstr(VariantConstr *variantConstr) override;
   void visitRecordVal(RecordVal *recordVal) override;
+  void visitFieldAccess(FieldAccess *recordAccess) override;
   void visitBinOp(BinOp *binOp) override;
   void visitUnOp(UnOp *unOp) override;
   void visitVarUse(VarUse *varUse) override;

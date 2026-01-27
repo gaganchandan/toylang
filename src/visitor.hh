@@ -15,6 +15,7 @@ protected:
   virtual void visitBool(Bool *boolExpr) = 0;
   virtual void visitVariantConstr(VariantConstr *variantConstr) = 0;
   virtual void visitRecordVal(RecordVal *recordVal) = 0;
+  virtual void visitFieldAccess(FieldAccess *recordAccess) = 0;
   virtual void visitBinOp(BinOp *binOp) = 0;
   virtual void visitUnOp(UnOp *unOp) = 0;
   virtual void visitVarUse(VarUse *varUse) = 0;
